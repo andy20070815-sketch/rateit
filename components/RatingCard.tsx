@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatDistanceToNow } from '../lib/utils'
 import type { Rating } from '../lib/types'
-import { CATEGORY_LABELS, CATEGORY_EMOJI } from '../lib/constants'
+import { CATEGORY_LABELS } from '../lib/constants'
+import CategoryIcon from './CategoryIcon'
 import ExternalScores from './ExternalScores'
 import AutoImage from './AutoImage'
 import CommentsSection from './CommentsSection'
@@ -20,6 +21,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
   const contentHref = `/content/${rating.category}/${encodeURIComponent(rating.title)}`
   const [showComments, setShowComments] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [imgFailed, setImgFailed] = useState(false)
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null))
@@ -49,17 +51,19 @@ export default function RatingCard({ rating, showUser = true }: Props) {
       )}
 
       <Link href={contentHref} className="block">
-        {rating.image_url ? (
+        {(rating.image_url && !imgFailed) ? (
           <img
             src={rating.image_url}
             alt={rating.title}
             className="w-full rounded-xl object-cover max-h-64"
+            onError={() => setImgFailed(true)}
           />
         ) : (
           <AutoImage
             title={rating.title}
             category={rating.category}
             className="w-full max-h-64 h-48"
+            ratingId={rating.id}
           />
         )}
       </Link>
@@ -67,7 +71,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-base">{CATEGORY_EMOJI[rating.category]}</span>
+            <CategoryIcon category={rating.category} size={13} className="text-zinc-400" />
             <span className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
               {CATEGORY_LABELS[rating.category]}
             </span>

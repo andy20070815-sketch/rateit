@@ -5,6 +5,23 @@ export interface ExternalResult {
   image_url: string | null
   description: string | null
   source: 'youtube' | 'wikipedia'
+  category: string
+}
+
+function guessCategory(description: string | null, source: 'youtube' | 'wikipedia'): string {
+  if (source === 'youtube') return 'youtube'
+  const d = (description ?? '').toLowerCase()
+  if (/rapper|singer|musician|band|album|hip.hop|r&b|pop star|music artist|recording artist|vocalist/.test(d)) return 'music'
+  if (/footballer|soccer player|basketball player|nba|nfl|tennis player|athlete|olympian|boxer|cricketer|baseball|formula 1|racing driver/.test(d)) return 'sport'
+  if (/tv series|television series|sitcom|drama series|animated series|netflix series|hbo series|streaming series/.test(d)) return 'tv'
+  if (/\bfilm\b|feature film|directed by|box office|cinema release/.test(d)) return 'movie'
+  if (/video game|game developer|nintendo|playstation|xbox|indie game/.test(d)) return 'game'
+  if (/youtuber|youtube channel|content creator|twitch streamer|live streamer/.test(d)) return 'youtube'
+  if (/restaurant|chef|cuisine|dish|recipe|food critic/.test(d)) return 'food'
+  if (/novel|author|book|writer|literary|novelist|published/.test(d)) return 'book'
+  // People who aren't in the above categories — influencers, models, personalities, etc.
+  if (/internet personality|social media|influencer|onlyfans|tiktok|instagram model|model|personality|celebrity/.test(d)) return 'other'
+  return 'other'
 }
 
 async function searchWikipedia(q: string): Promise<ExternalResult[]> {
@@ -13,12 +30,16 @@ async function searchWikipedia(q: string): Promise<ExternalResult[]> {
     const res = await fetch(url, { next: { revalidate: 3600 } })
     const data = await res.json()
     const pages = Object.values(data.query?.pages ?? {}) as Record<string, unknown>[]
-    return pages.map((p: Record<string, unknown>) => ({
-      title: p.title as string,
-      image_url: (p.thumbnail as { source?: string } | undefined)?.source ?? null,
-      description: (p.description as string | undefined) ?? null,
-      source: 'wikipedia' as const,
-    }))
+    return pages.map((p: Record<string, unknown>) => {
+      const description = (p.description as string | undefined) ?? null
+      return {
+        title: p.title as string,
+        image_url: (p.thumbnail as { source?: string } | undefined)?.source ?? null,
+        description,
+        source: 'wikipedia' as const,
+        category: guessCategory(description, 'wikipedia'),
+      }
+    })
   } catch {
     return []
   }
@@ -35,11 +56,13 @@ async function searchYouTube(q: string): Promise<ExternalResult[]> {
     return (data.items ?? []).map((item: Record<string, unknown>) => {
       const snippet = item.snippet as Record<string, unknown>
       const thumbnails = snippet.thumbnails as Record<string, { url: string }> | undefined
+      const description = snippet.description as string | null
       return {
         title: (snippet.channelTitle ?? snippet.title) as string,
         image_url: thumbnails?.high?.url ?? thumbnails?.default?.url ?? null,
-        description: snippet.description as string | null,
+        description,
         source: 'youtube' as const,
+        category: guessCategory(description, 'youtube'),
       }
     })
   } catch {

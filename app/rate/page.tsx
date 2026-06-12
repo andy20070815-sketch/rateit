@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic'
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '../../lib/supabase/client'
-import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_LABELS } from '../../lib/constants'
+import { CATEGORIES, CATEGORY_LABELS } from '../../lib/constants'
+import CategoryIcon from '../../components/CategoryIcon'
 import type { Category } from '../../lib/types'
 import TitleSearch from '../../components/TitleSearch'
 
@@ -129,7 +130,7 @@ function RateForm() {
                       : 'border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}
+                  <CategoryIcon category={cat} size={13} className="inline-block mr-1.5" />{CATEGORY_LABELS[cat]}
                 </button>
               ))}
             </div>

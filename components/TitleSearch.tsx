@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import CategoryIcon from './CategoryIcon'
 import type { Category } from '../lib/types'
 
 interface SearchResult {
@@ -87,9 +88,14 @@ export default function TitleSearch({ category, value, onChange, onImageSelect }
               {/* Artwork or placeholder */}
               <div className="w-11 h-11 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0 flex items-center justify-center">
                 {result.image ? (
-                  <img src={result.image} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={result.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                  />
                 ) : (
-                  <span className="text-lg text-zinc-400">?</span>
+                  <CategoryIcon category={category} size={20} className="text-zinc-400" strokeWidth={1.5} />
                 )}
               </div>
 

@@ -10,7 +10,7 @@ async function getWikipediaImage(title: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
-      { cache: 'no-store', headers: { 'User-Agent': 'RateIt/1.0' } }
+      { next: { revalidate: 86400 }, headers: { 'User-Agent': 'RateIt/1.0' } }
     )
     if (!res.ok) return null
     const data = await res.json()
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
       const res = await fetch(
         `https://www.omdbapi.com/?t=${encodeURIComponent(title)}&apikey=${apiKey}`,
-        { cache: 'no-store' }
+        { next: { revalidate: 86400 } }
       )
       const data = await res.json()
       const url = data.Poster && data.Poster !== 'N/A' ? data.Poster : null
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     if (itunesMedia) {
       const res = await fetch(
         `https://itunes.apple.com/search?term=${encodeURIComponent(title)}&media=${itunesMedia}&limit=1&country=us`,
-        { cache: 'no-store' }
+        { next: { revalidate: 86400 } }
       )
       const data = await res.json()
       const item = data.results?.[0]

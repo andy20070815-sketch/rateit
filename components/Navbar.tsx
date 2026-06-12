@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, PlusCircle, User, Compass, Search, X } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
-import { CATEGORY_EMOJI, CATEGORY_LABELS } from '../lib/constants'
+import { CATEGORY_LABELS } from '../lib/constants'
+import CategoryIcon from './CategoryIcon'
 import type { Category } from '../lib/types'
 
 interface Suggestion {
@@ -179,14 +180,15 @@ export default function Navbar({ username }: { username: string }) {
                         className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xl flex-shrink-0">
-                        {CATEGORY_EMOJI[s.primaryCategory]}
+                      <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                        <CategoryIcon category={s.primaryCategory} size={18} className="text-zinc-400" strokeWidth={1.5} />
                       </div>
                     )}
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-sm font-semibold truncate">{s.title}</p>
-                      <p className="text-xs text-zinc-400">
-                        {CATEGORY_EMOJI[s.primaryCategory]} {CATEGORY_LABELS[s.primaryCategory]}
+                      <p className="text-xs text-zinc-400 flex items-center gap-1">
+                        <CategoryIcon category={s.primaryCategory} size={11} className="text-zinc-400" />
+                        {CATEGORY_LABELS[s.primaryCategory]}
                         {' · '}{s.count} {s.count === 1 ? 'rating' : 'ratings'}
                       </p>
                     </div>

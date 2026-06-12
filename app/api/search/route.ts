@@ -39,12 +39,64 @@ export async function GET(request: NextRequest) {
   }
 
   if (!media) {
-    // No iTunes for this category — return matches from our DB
-    const titles = Object.entries(countMap)
+    // No iTunes — fetch images from YouTube (for youtube category) or Wikipedia
+    let external: { title: string; image: string | null; subtitle: string | null }[] = []
+
+    if (category === 'youtube') {
+      const ytKey = process.env.YOUTUBE_API_KEY
+      if (ytKey) {
+        try {
+          const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&maxResults=8&type=channel&key=${ytKey}`
+          const ytRes = await fetch(ytUrl, { cache: 'no-store' })
+          const ytData = await ytRes.json()
+          if (!ytData.error) {
+            external = (ytData.items ?? []).map((item: Record<string, unknown>) => {
+              const snippet = item.snippet as Record<string, unknown>
+              const thumbnails = snippet.thumbnails as Record<string, { url: string }> | undefined
+              return {
+                title: (snippet.channelTitle ?? snippet.title) as string,
+                image: thumbnails?.high?.url ?? thumbnails?.default?.url ?? null,
+                subtitle: (snippet.description as string | null)?.slice(0, 80) || null,
+              }
+            })
+          }
+        } catch { /* ignore */ }
+      }
+    } else {
+      // Wikipedia for sport, food, other
+      try {
+        const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=8&prop=pageimages|description&piprop=thumbnail&pithumbsize=200&format=json&origin=*`
+        const wikiRes = await fetch(wikiUrl, { cache: 'no-store' })
+        const wikiData = await wikiRes.json()
+        const pages = Object.values(wikiData.query?.pages ?? {}) as Record<string, unknown>[]
+        external = pages.map(p => ({
+          title: p.title as string,
+          image: (p.thumbnail as { source?: string } | undefined)?.source ?? null,
+          subtitle: (p.description as string | undefined) ?? null,
+        }))
+      } catch { /* ignore */ }
+    }
+
+    // Build image lookup from external results
+    const imageMap = new Map(external.map(r => [r.title.toLowerCase(), r]))
+
+    // DB results enriched with external images where available
+    const dbResults = Object.entries(countMap)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([title, count]) => ({ title, subtitle: null, image: null, ratingCount: count }))
-    return NextResponse.json(titles)
+      .slice(0, 4)
+      .map(([title, count]) => {
+        const ext = imageMap.get(title.toLowerCase())
+        return { title, subtitle: ext?.subtitle ?? null, year: null, image: ext?.image ?? null, ratingCount: count }
+      })
+
+    // External results not already in DB
+    const dbTitles = new Set(Object.keys(countMap).map(t => t.toLowerCase()))
+    const newResults = external
+      .filter(r => !dbTitles.has(r.title.toLowerCase()))
+      .slice(0, 4)
+      .map(r => ({ title: r.title, subtitle: r.subtitle, year: null, image: r.image, ratingCount: 0 }))
+
+    return NextResponse.json([...dbResults, ...newResults].slice(0, 7))
   }
 
   try {

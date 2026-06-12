@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '../../../lib/supabase/client'
-import { CATEGORY_EMOJI } from '../../../lib/constants'
+import CategoryIcon from '../../../components/CategoryIcon'
 import type { Rating } from '../../../lib/types'
 
 export default function NewStoryPage() {
@@ -73,7 +73,6 @@ export default function NewStoryPage() {
           </div>
         ) : ratings.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <p className="text-4xl">⭐</p>
             <p className="text-white font-semibold">No ratings yet</p>
             <p className="text-white/40 text-sm">Post a rating first, then share it as a story</p>
             <button
@@ -93,11 +92,11 @@ export default function NewStoryPage() {
                 className="w-full flex items-center gap-4 bg-white/8 hover:bg-white/12 border border-white/10 rounded-2xl p-4 text-left transition-colors disabled:opacity-50"
               >
                 {/* Artwork */}
-                <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/10 shrink-0 flex items-center justify-center text-2xl">
+                <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/10 shrink-0 flex items-center justify-center">
                   {rating.image_url ? (
                     <img src={rating.image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    CATEGORY_EMOJI[rating.category]
+                    <CategoryIcon category={rating.category} size={24} className="text-white/40" strokeWidth={1.5} />
                   )}
                 </div>
 

@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { createClient } from '../../lib/supabase/server'
 import Navbar from '../../components/Navbar'
 import ExternalSearchResults from '../../components/ExternalSearchResults'
-import { CATEGORY_EMOJI, CATEGORY_LABELS } from '../../lib/constants'
+import SearchResultImage from '../../components/SearchResultImage'
+import CategoryIcon from '../../components/CategoryIcon'
+import { CATEGORY_LABELS } from '../../lib/constants'
 import type { Category } from '../../lib/types'
 
 interface Props {
@@ -86,14 +89,13 @@ export default async function SearchPage({ searchParams }: Props) {
 
         {!query ? (
           <div className="flex flex-col items-center py-24 gap-3 text-zinc-400">
-            <span className="text-5xl">🔍</span>
+            <Search size={40} strokeWidth={1.5} />
             <p className="font-semibold text-zinc-700 dark:text-zinc-300">Search anything</p>
             <p className="text-sm text-center">Movies, artists, athletes, shows, games…</p>
           </div>
         ) : results.length === 0 ? (
           <div className="space-y-4">
             <div className="flex flex-col items-center py-8 gap-2 text-zinc-400">
-              <span className="text-4xl">😶</span>
               <p className="font-semibold text-zinc-700 dark:text-zinc-300">Nothing rated yet for &ldquo;{query}&rdquo;</p>
             </div>
             <ExternalSearchResults q={query} existingTitles={[]} />
@@ -112,19 +114,18 @@ export default async function SearchPage({ searchParams }: Props) {
                   href={`/content/${r.primaryCategory}/${encodeURIComponent(r.title)}`}
                   className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
                 >
-                  {r.image_url ? (
-                    <img src={r.image_url} alt={r.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-3xl flex-shrink-0">
-                      {CATEGORY_EMOJI[r.primaryCategory]}
-                    </div>
-                  )}
+                  <SearchResultImage
+                    title={r.title}
+                    category={r.primaryCategory}
+                    imageUrl={r.image_url}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{r.title}</p>
                     <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
                       {r.allCategories.map(cat => (
-                        <span key={cat} className="text-xs text-zinc-500">
-                          {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}
+                        <span key={cat} className="flex items-center gap-1 text-xs text-zinc-500">
+                          <CategoryIcon category={cat} size={11} className="text-zinc-400" />
+                          {CATEGORY_LABELS[cat]}
                         </span>
                       ))}
                     </div>

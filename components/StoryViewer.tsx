@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
 import type { StoryGroup } from '../lib/types'
@@ -134,7 +135,11 @@ export default function StoryViewer({ groups, startGroupIndex, viewerId, onClose
 
         {/* Header */}
         <div className="absolute top-5 left-0 right-0 z-30 flex items-center justify-between px-3">
-          <div className="flex items-center gap-2">
+          <Link
+            href={`/profile/${group.profile.username}`}
+            onClick={onClose}
+            className="flex items-center gap-2"
+          >
             <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white bg-zinc-700">
               {group.profile.avatar_url ? (
                 <img src={group.profile.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -146,7 +151,7 @@ export default function StoryViewer({ groups, startGroupIndex, viewerId, onClose
             </div>
             <span className="text-white text-sm font-semibold">{group.profile.username}</span>
             <span className="text-white/60 text-xs">{formatDistanceToNow(story.created_at)}</span>
-          </div>
+          </Link>
           <button onClick={onClose} className="text-white p-1">
             <X size={20} />
           </button>
@@ -155,14 +160,15 @@ export default function StoryViewer({ groups, startGroupIndex, viewerId, onClose
         {/* Story content — template for ratings, plain image otherwise */}
         {story.rating ? (
           <RatingStoryTemplate key={story.id} rating={story.rating} />
-        ) : (
+        ) : story.image_url ? (
           <img
             src={story.image_url}
             alt=""
             className="w-full h-full object-cover"
             draggable={false}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
-        )}
+        ) : null}
 
         {/* Tap zones */}
         <div

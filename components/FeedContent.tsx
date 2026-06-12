@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '../lib/supabase/client'
 import RatingCard from './RatingCard'
-import { CATEGORIES, CATEGORY_EMOJI, CATEGORY_LABELS } from '../lib/constants'
+import { CATEGORIES, CATEGORY_LABELS } from '../lib/constants'
+import CategoryIcon from './CategoryIcon'
 import type { Rating, Category } from '../lib/types'
 
 interface Props {
@@ -61,7 +62,7 @@ export default function FeedContent({ currentUserId }: Props) {
                 : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
             }`}
           >
-            ✦ All
+            All
           </button>
           {CATEGORIES.map(cat => (
             <button
@@ -73,7 +74,7 @@ export default function FeedContent({ currentUserId }: Props) {
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
-              {CATEGORY_EMOJI[cat]} {CATEGORY_LABELS[cat]}
+              <CategoryIcon category={cat} size={12} className="inline-block mr-1" />{CATEGORY_LABELS[cat]}
             </button>
           ))}
         </div>
@@ -85,7 +86,6 @@ export default function FeedContent({ currentUserId }: Props) {
           <div className="text-center py-16 text-zinc-400 text-sm">Loading…</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 space-y-2">
-            <p className="text-2xl">🤷</p>
             <p className="font-semibold">No {activeCategory !== 'all' ? CATEGORY_LABELS[activeCategory as Category] : ''} ratings yet</p>
           </div>
         ) : (

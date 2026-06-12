@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Play, Globe } from 'lucide-react'
+import SafeImage from './SafeImage'
 import type { ExternalResult } from '../app/api/search/external/route'
 
 export default function ExternalSearchResults({
@@ -60,18 +62,23 @@ export default function ExternalSearchResults({
       {results.map(r => (
         <Link
           key={r.title}
-          href={`/rate?title=${encodeURIComponent(r.title)}`}
+          href={`/rate?title=${encodeURIComponent(r.title)}&category=${r.category}`}
           className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-700 rounded-2xl p-3 hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors"
         >
           {r.image_url ? (
-            <img
+            <SafeImage
               src={r.image_url}
               alt={r.title}
               className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+              fallback={
+                <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">
+                  {r.source === 'youtube' ? <Play size={20} className="text-zinc-400" /> : <Globe size={20} className="text-zinc-400" />}
+                </div>
+              }
             />
           ) : (
             <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">
-              {r.source === 'youtube' ? '▶️' : '🔍'}
+              {r.source === 'youtube' ? <Play size={20} className="text-zinc-400" /> : <Globe size={20} className="text-zinc-400" />}
             </div>
           )}
 

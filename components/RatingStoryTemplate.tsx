@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CATEGORY_EMOJI, CATEGORY_LABELS } from '../lib/constants'
+import { CATEGORY_LABELS } from '../lib/constants'
+import CategoryIcon from './CategoryIcon'
+import { createClient } from '../lib/supabase/client'
 import type { Rating } from '../lib/types'
 
 export default function RatingStoryTemplate({ rating }: { rating: Rating }) {
@@ -11,7 +13,12 @@ export default function RatingStoryTemplate({ rating }: { rating: Rating }) {
     if (imageUrl) return
     fetch(`/api/content-image?title=${encodeURIComponent(rating.title)}&category=${rating.category}`)
       .then((r) => r.json())
-      .then((d) => { if (d.url) setImageUrl(d.url) })
+      .then((d) => {
+        if (d.url) {
+          setImageUrl(d.url)
+          createClient().from('ratings').update({ image_url: d.url }).eq('id', rating.id).then(() => null)
+        }
+      })
       .catch(() => null)
   }, [rating.title, rating.category])
 
@@ -29,6 +36,7 @@ export default function RatingStoryTemplate({ rating }: { rating: Rating }) {
           alt=""
           className="absolute inset-0 w-full h-full object-cover scale-110"
           style={{ filter: 'blur(24px) brightness(0.35)' }}
+          onError={() => setImageUrl(null)}
         />
       )}
 
@@ -40,13 +48,14 @@ export default function RatingStoryTemplate({ rating }: { rating: Rating }) {
             src={imageUrl}
             alt={rating.title}
             className="w-full h-52 object-cover"
+            onError={() => setImageUrl(null)}
           />
         )}
 
         <div className="p-5 space-y-3">
           {/* Category */}
           <div className="flex items-center gap-1.5">
-            <span className="text-lg">{CATEGORY_EMOJI[rating.category]}</span>
+            <CategoryIcon category={rating.category} size={13} className="text-white/60" />
             <span className="text-white/60 text-xs uppercase tracking-widest font-semibold">
               {CATEGORY_LABELS[rating.category]}
             </span>

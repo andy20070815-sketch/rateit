@@ -7,7 +7,8 @@ import ExternalScores from '../../../../components/ExternalScores'
 import ContentDescription from '../../../../components/ContentDescription'
 import CommentsSection from '../../../../components/CommentsSection'
 import type { Rating, Category } from '../../../../lib/types'
-import { CATEGORY_LABELS, CATEGORY_EMOJI, CATEGORIES } from '../../../../lib/constants'
+import { CATEGORY_LABELS, CATEGORIES } from '../../../../lib/constants'
+import CategoryIcon from '../../../../components/CategoryIcon'
 import { formatDistanceToNow } from '../../../../lib/utils'
 
 interface Props {
@@ -72,7 +73,7 @@ export default async function ContentPage({ params }: Props) {
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-lg">{CATEGORY_EMOJI[category]}</span>
+              <CategoryIcon category={category} size={14} className="text-zinc-400" />
               <span className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
                 {CATEGORY_LABELS[category]}
               </span>
