@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { createClient } from '../../../../lib/supabase/server'
 import Navbar from '../../../../components/Navbar'
 import AutoImage from '../../../../components/AutoImage'
@@ -9,10 +10,46 @@ import CommentsSection from '../../../../components/CommentsSection'
 import type { Rating, Category } from '../../../../lib/types'
 import { CATEGORY_LABELS, CATEGORIES } from '../../../../lib/constants'
 import CategoryIcon from '../../../../components/CategoryIcon'
-import { formatDistanceToNow } from '../../../../lib/utils'
+import { formatDistanceToNow, isVideoUrl } from '../../../../lib/utils'
 
 interface Props {
   params: Promise<{ category: string; title: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { category: rawCategory, title: encodedTitle } = await params
+  const title = decodeURIComponent(encodedTitle)
+  const category = rawCategory as Category
+
+  const supabase = await createClient()
+  const { data: ratings } = await supabase
+    .from('ratings')
+    .select('score, image_url')
+    .eq('title', title)
+    .eq('category', category)
+
+  if (!ratings || ratings.length === 0) return { title }
+
+  const avg = Math.round((ratings.reduce((s, r) => s + r.score, 0) / ratings.length) * 10) / 10
+  const image = ratings.find(r => r.image_url)?.image_url
+  const catLabel = CATEGORY_LABELS[category]
+  const desc = `${avg}/10 · ${ratings.length} ${ratings.length === 1 ? 'rating' : 'ratings'} · ${catLabel}`
+
+  return {
+    title: `${title} — ${avg}/10`,
+    description: `${title} has a ${avg}/10 community rating on rateit.`,
+    openGraph: {
+      title: `${title} | rateit`,
+      description: desc,
+      images: image ? [{ url: image, width: 400, height: 600 }] : [],
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title: `${title} | rateit`,
+      description: desc,
+      images: image ? [image] : [],
+    },
+  }
 }
 
 export default async function ContentPage({ params }: Props) {
@@ -61,7 +98,7 @@ export default async function ContentPage({ params }: Props) {
   return (
     <>
       <Navbar username={profile?.username ?? ''} />
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-lg md:max-w-2xl mx-auto px-4 py-6 space-y-6">
 
         {/* Header */}
         <div className="space-y-4">
@@ -134,6 +171,7 @@ export default async function ContentPage({ params }: Props) {
           <h2 className="font-bold text-base">Reviews</h2>
           {(ratings as Rating[]).map((rating) => (
             <div key={rating.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-2">
+              {/* User row */}
               <div className="flex items-center justify-between">
                 {rating.profiles && (
                   <Link href={`/profile/${rating.profiles.username}`} className="flex items-center gap-2">
@@ -147,18 +185,38 @@ export default async function ContentPage({ params }: Props) {
                     <span className="text-sm font-semibold">{rating.profiles.username}</span>
                   </Link>
                 )}
-                <div className="flex items-center gap-1">
-                  <span className={`text-xl font-black ${
-                    rating.score >= 8 ? 'text-green-500' :
-                    rating.score >= 5 ? 'text-yellow-500' : 'text-red-500'
-                  }`}>{rating.score}</span>
-                  <span className="text-xs text-zinc-400">/10</span>
-                </div>
+                <p className="text-xs text-zinc-400">{formatDistanceToNow(rating.created_at)}</p>
               </div>
-              {rating.review && (
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">{rating.review}</p>
+
+              {/* Score + review on the same line */}
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <span className={`text-xl font-black mr-1 ${
+                  rating.score >= 8 ? 'text-green-500' :
+                  rating.score >= 5 ? 'text-yellow-500' : 'text-red-500'
+                }`}>
+                  {rating.score}<span className="text-xs font-normal text-zinc-400">/10</span>
+                </span>
+                {rating.review}
+              </p>
+
+              {/* User's uploaded media */}
+              {rating.image_url && (
+                isVideoUrl(rating.image_url) ? (
+                  <video
+                    src={rating.image_url}
+                    className="w-full rounded-xl max-h-72"
+                    controls
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={rating.image_url}
+                    alt=""
+                    className="w-full rounded-xl object-cover max-h-72"
+                  />
+                )
               )}
-              <p className="text-xs text-zinc-400">{formatDistanceToNow(rating.created_at)}</p>
+
               <CommentsSection ratingId={rating.id} currentUserId={user?.id ?? null} />
             </div>
           ))}

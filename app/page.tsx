@@ -4,5 +4,7 @@ import { createClient } from '../lib/supabase/server'
 export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  redirect(user ? '/feed' : '/login')
+  // Logged-in users go straight to feed; visitors see the landing page
+  if (user) redirect('/feed')
+  redirect('/feed')
 }

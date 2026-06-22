@@ -136,6 +136,13 @@ export default function SignupPage() {
             Sign in
           </Link>
         </p>
+
+        <p className="text-center text-xs text-zinc-500 leading-relaxed border-t border-zinc-100 dark:border-zinc-800 pt-4">
+          Your ratings are public by default. By creating an account you agree to our{' '}
+          <Link href="/terms" className="underline text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white">Terms of Service</Link>
+          {' '}and{' '}
+          <Link href="/privacy" className="underline text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white">Privacy Policy</Link>.
+        </p>
       </div>
     </div>
   )

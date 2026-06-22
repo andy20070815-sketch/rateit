@@ -9,6 +9,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   book: 'Book',
   game: 'Game',
   food: 'Food',
+  person: 'Person',
   other: 'Other',
 }
 
@@ -21,6 +22,7 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   book: '📚',
   game: '🎮',
   food: '🍽️',
+  person: '👤',
   other: '⭐',
 }
 

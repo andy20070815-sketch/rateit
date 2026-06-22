@@ -112,6 +112,7 @@ function RateForm() {
                 setAutocompleteImageUrl(url)
                 setImagePreview(url)
               }}
+              onCategorySelect={setCategory}
             />
           </div>
 

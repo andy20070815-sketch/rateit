@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar'
 import ExternalSearchResults from '../../components/ExternalSearchResults'
 import SearchResultImage from '../../components/SearchResultImage'
 import CategoryIcon from '../../components/CategoryIcon'
+import SearchBar from '../../components/SearchBar'
 import { CATEGORY_LABELS } from '../../lib/constants'
 import type { Category } from '../../lib/types'
 
@@ -21,6 +22,14 @@ interface EntityResult {
   image_url: string | null
 }
 
+interface ProfileResult {
+  id: string
+  username: string
+  full_name: string | null
+  avatar_url: string | null
+  ratingCount: number
+}
+
 export default async function SearchPage({ searchParams }: Props) {
   const { q = '' } = await searchParams
   const query = q.trim()
@@ -34,16 +43,24 @@ export default async function SearchPage({ searchParams }: Props) {
     profile = p
   }
 
-  let results: EntityResult[] = []
+  let contentResults: EntityResult[] = []
+  let peopleResults: ProfileResult[] = []
 
   if (query.length >= 1) {
-    const { data: ratings } = await supabase
-      .from('ratings')
-      .select('id, title, category, score, image_url')
-      .ilike('title', `%${query}%`)
-      .limit(500)
+    const [{ data: ratings }, { data: matchedProfiles }] = await Promise.all([
+      supabase
+        .from('ratings')
+        .select('id, title, category, score, image_url')
+        .ilike('title', `%${query}%`)
+        .limit(500),
+      supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+        .limit(8),
+    ])
 
-    // Group by title (case-insensitive)
+    // Build content results — group by title
     const groups = new Map<string, {
       title: string
       categoryCount: Map<Category, number>
@@ -63,9 +80,8 @@ export default async function SearchPage({ searchParams }: Props) {
       if (!g.image_url && r.image_url) g.image_url = r.image_url
     }
 
-    results = [...groups.values()]
+    contentResults = [...groups.values()]
       .map(g => {
-        // Pick the category with most ratings as primary
         const sorted = [...g.categoryCount.entries()].sort((a, b) => b[1] - a[1])
         return {
           title: g.title,
@@ -77,26 +93,49 @@ export default async function SearchPage({ searchParams }: Props) {
         }
       })
       .sort((a, b) => b.count - a.count)
+
+    // Build people results — get rating count per profile
+    if (matchedProfiles && matchedProfiles.length > 0) {
+      const profileIds = matchedProfiles.map(p => p.id)
+      const { data: ratingCounts } = await supabase
+        .from('ratings')
+        .select('user_id')
+        .in('user_id', profileIds)
+
+      const countMap = new Map<string, number>()
+      for (const r of ratingCounts || []) {
+        countMap.set(r.user_id, (countMap.get(r.user_id) ?? 0) + 1)
+      }
+
+      peopleResults = matchedProfiles.map(p => ({
+        ...p,
+        ratingCount: countMap.get(p.id) ?? 0,
+      }))
+    }
   }
 
   const scoreColor = (avg: number) =>
     avg >= 8 ? 'text-green-500' : avg >= 5 ? 'text-yellow-500' : 'text-red-500'
 
+  const hasResults = contentResults.length > 0 || peopleResults.length > 0
+
   return (
     <>
       <Navbar username={profile?.username ?? ''} />
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
+      <main className="max-w-lg md:max-w-2xl mx-auto px-4 py-4 space-y-4">
+
+        <SearchBar />
 
         {!query ? (
-          <div className="flex flex-col items-center py-24 gap-3 text-zinc-400">
-            <Search size={40} strokeWidth={1.5} />
+          <div className="flex flex-col items-center py-16 gap-3 text-zinc-400">
+            <Search size={36} strokeWidth={1.5} />
             <p className="font-semibold text-zinc-700 dark:text-zinc-300">Search anything</p>
-            <p className="text-sm text-center">Movies, artists, athletes, shows, games…</p>
+            <p className="text-sm text-center">Movies, artists, athletes, shows, games, or people…</p>
           </div>
-        ) : results.length === 0 ? (
+        ) : !hasResults ? (
           <div className="space-y-4">
             <div className="flex flex-col items-center py-8 gap-2 text-zinc-400">
-              <p className="font-semibold text-zinc-700 dark:text-zinc-300">Nothing rated yet for &ldquo;{query}&rdquo;</p>
+              <p className="font-semibold text-zinc-700 dark:text-zinc-300">Nothing found for &ldquo;{query}&rdquo;</p>
             </div>
             <ExternalSearchResults q={query} existingTitles={[]} />
           </div>
@@ -104,45 +143,91 @@ export default async function SearchPage({ searchParams }: Props) {
           <>
             <h1 className="font-black text-xl">
               Results for &ldquo;{query}&rdquo;
-              <span className="ml-2 text-sm font-normal text-zinc-400">{results.length} {results.length === 1 ? 'result' : 'results'}</span>
             </h1>
 
-            <div className="space-y-3">
-              {results.map(r => (
-                <Link
-                  key={r.title.toLowerCase()}
-                  href={`/content/${r.primaryCategory}/${encodeURIComponent(r.title)}`}
-                  className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
-                >
-                  <SearchResultImage
-                    title={r.title}
-                    category={r.primaryCategory}
-                    imageUrl={r.image_url}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{r.title}</p>
-                    <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
-                      {r.allCategories.map(cat => (
-                        <span key={cat} className="flex items-center gap-1 text-xs text-zinc-500">
-                          <CategoryIcon category={cat} size={11} className="text-zinc-400" />
-                          {CATEGORY_LABELS[cat]}
-                        </span>
-                      ))}
+            {/* People */}
+            {peopleResults.length > 0 && (
+              <section className="space-y-2">
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">People</p>
+                <div className="space-y-2">
+                  {peopleResults.map(p => (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3"
+                    >
+                      <Link href={`/profile/${p.username}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                        <div className="w-11 h-11 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-lg font-black overflow-hidden shrink-0">
+                          {p.avatar_url ? (
+                            <img src={p.avatar_url} alt={p.username} className="w-full h-full object-cover" />
+                          ) : (
+                            p.username[0].toUpperCase()
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold truncate">{p.full_name || p.username}</p>
+                          <p className="text-sm text-zinc-500">
+                            @{p.username}
+                            {p.ratingCount > 0 && (
+                              <span className="ml-2">{p.ratingCount} {p.ratingCount === 1 ? 'rating' : 'ratings'}</span>
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                      <Link
+                        href={`/rate?title=${encodeURIComponent('@' + p.username)}&category=person`}
+                        className="shrink-0 px-3 py-1.5 rounded-lg bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-80 transition-opacity"
+                      >
+                        Rate
+                      </Link>
                     </div>
-                    <p className="text-xs text-zinc-400 mt-1">{r.count} {r.count === 1 ? 'rating' : 'ratings'}</p>
-                  </div>
-                  <div className={`text-3xl font-black shrink-0 ${scoreColor(r.avg)}`}>
-                    {Math.round(r.avg * 10) / 10}
-                    <span className="text-xs font-normal text-zinc-400">/10</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            {/* Live web results for anything not yet in RateIt */}
+            {/* Content */}
+            {contentResults.length > 0 && (
+              <section className="space-y-2">
+                {peopleResults.length > 0 && (
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Content</p>
+                )}
+                <div className="space-y-3">
+                  {contentResults.map(r => (
+                    <Link
+                      key={r.title.toLowerCase()}
+                      href={`/content/${r.primaryCategory}/${encodeURIComponent(r.title)}`}
+                      className="flex items-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
+                    >
+                      <SearchResultImage
+                        title={r.title}
+                        category={r.primaryCategory}
+                        imageUrl={r.image_url}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate">{r.title}</p>
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+                          {r.allCategories.map(cat => (
+                            <span key={cat} className="flex items-center gap-1 text-xs text-zinc-500">
+                              <CategoryIcon category={cat} size={11} className="text-zinc-400" />
+                              {CATEGORY_LABELS[cat]}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-zinc-400 mt-1">{r.count} {r.count === 1 ? 'rating' : 'ratings'}</p>
+                      </div>
+                      <div className={`text-3xl font-black shrink-0 ${scoreColor(r.avg)}`}>
+                        {Math.round(r.avg * 10) / 10}
+                        <span className="text-xs font-normal text-zinc-400">/10</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <ExternalSearchResults
               q={query}
-              existingTitles={results.map(r => r.title)}
+              existingTitles={contentResults.map(r => r.title)}
             />
           </>
         )}

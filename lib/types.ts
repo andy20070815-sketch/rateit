@@ -7,6 +7,7 @@ export type Category =
   | 'book'
   | 'game'
   | 'food'
+  | 'person'
   | 'other'
 
 export interface Profile {

@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { Home, PlusCircle, User, Compass, Search, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, X } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
 import { CATEGORY_LABELS } from '../lib/constants'
 import CategoryIcon from './CategoryIcon'
@@ -18,7 +18,6 @@ interface Suggestion {
 }
 
 export default function Navbar({ username }: { username: string }) {
-  const pathname = usePathname()
   const router = useRouter()
   const isLoggedIn = !!username
 
@@ -131,7 +130,7 @@ export default function Navbar({ username }: { username: string }) {
 
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
+    <header className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 md:hidden">
       <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-2">
 
         {searchOpen ? (
@@ -216,13 +215,7 @@ export default function Navbar({ username }: { username: string }) {
               rateit
             </Link>
 
-            <nav className="flex items-center gap-1">
-              {/* Home */}
-              <Link href="/feed" className={`p-2 rounded-xl transition-colors ${pathname === '/feed' ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'}`} aria-label="Feed">
-                <Home size={20} />
-              </Link>
-
-              {/* Search */}
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => setSearchOpen(true)}
                 className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -231,27 +224,12 @@ export default function Navbar({ username }: { username: string }) {
                 <Search size={20} />
               </button>
 
-              {/* Explore */}
-              <Link href="/explore" className={`p-2 rounded-xl transition-colors ${pathname === '/explore' ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'}`} aria-label="Explore">
-                <Compass size={20} />
-              </Link>
-
-              {/* Rate */}
-              <Link href="/rate" className={`p-2 rounded-xl transition-colors ${pathname === '/rate' ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'}`} aria-label="Rate">
-                <PlusCircle size={20} />
-              </Link>
-
-              {/* Profile or Sign in */}
-              {isLoggedIn ? (
-                <Link href={`/profile/${username}`} className={`p-2 rounded-xl transition-colors ${pathname.startsWith('/profile') ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'}`} aria-label="Profile">
-                  <User size={20} />
-                </Link>
-              ) : (
+              {!isLoggedIn && (
                 <Link href="/login" className="px-3 py-1.5 text-sm font-semibold bg-black dark:bg-white text-white dark:text-black rounded-xl">
                   Sign in
                 </Link>
               )}
-            </nav>
+            </div>
           </>
         )}
 

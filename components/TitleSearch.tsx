@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import CategoryIcon from './CategoryIcon'
+import { CATEGORY_LABELS } from '../lib/constants'
 import type { Category } from '../lib/types'
 
 interface SearchResult {
   title: string
+  category: Category
   subtitle: string | null
   year: string | null
   image: string | null
@@ -17,9 +19,10 @@ interface Props {
   value: string
   onChange: (value: string) => void
   onImageSelect?: (url: string) => void
+  onCategorySelect?: (cat: Category) => void
 }
 
-export default function TitleSearch({ category, value, onChange, onImageSelect }: Props) {
+export default function TitleSearch({ category, value, onChange, onImageSelect, onCategorySelect }: Props) {
   const [results, setResults] = useState<SearchResult[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -56,6 +59,7 @@ export default function TitleSearch({ category, value, onChange, onImageSelect }
   function select(result: SearchResult) {
     onChange(result.title)
     if (onImageSelect && result.image) onImageSelect(result.image)
+    if (onCategorySelect && result.category) onCategorySelect(result.category)
     setOpen(false)
   }
 
@@ -106,9 +110,17 @@ export default function TitleSearch({ category, value, onChange, onImageSelect }
                     <span className="text-xs text-zinc-400 shrink-0">{result.year}</span>
                   )}
                 </div>
-                {result.subtitle && (
-                  <p className="text-xs text-zinc-500 truncate">{result.subtitle}</p>
-                )}
+                <div className="flex items-center gap-2 mt-0.5">
+                  {result.category && (
+                    <span className="flex items-center gap-1 text-xs text-zinc-400">
+                      <CategoryIcon category={result.category} size={10} strokeWidth={1.5} />
+                      {CATEGORY_LABELS[result.category]}
+                    </span>
+                  )}
+                  {result.subtitle && (
+                    <p className="text-xs text-zinc-500 truncate">{result.subtitle}</p>
+                  )}
+                </div>
               </div>
 
               {/* Rating count badge */}

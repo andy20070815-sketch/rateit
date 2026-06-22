@@ -219,7 +219,16 @@ const REVIEWS = {
 }
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
-function randScore() { return Math.floor(Math.random() * 10) + 1 }
+function randScore() {
+  const weights = [1, 1, 2, 3, 4, 5, 6, 5, 3, 1]
+  const total = weights.reduce((a, b) => a + b, 0)
+  let r = Math.random() * total
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i]
+    if (r <= 0) return i + 1
+  }
+  return 7
+}
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 

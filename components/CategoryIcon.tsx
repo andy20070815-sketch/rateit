@@ -1,4 +1,4 @@
-import { Film, Tv, Trophy, PlayCircle, Music, BookOpen, Gamepad2, Utensils, MoreHorizontal } from 'lucide-react'
+import { Film, Tv, Trophy, PlayCircle, Music, BookOpen, Gamepad2, Utensils, User, MoreHorizontal } from 'lucide-react'
 import type { Category } from '../lib/types'
 
 const icons: Record<Category, React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>> = {
@@ -10,6 +10,7 @@ const icons: Record<Category, React.ComponentType<{ size?: number; className?: s
   book: BookOpen,
   game: Gamepad2,
   food: Utensils,
+  person: User,
   other: MoreHorizontal,
 }
 

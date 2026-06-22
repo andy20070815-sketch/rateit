@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '../../lib/supabase/server'
 import Navbar from '../../components/Navbar'
 import SignOutButton from '../../components/SignOutButton'
+import DeleteAccountButton from '../../components/DeleteAccountButton'
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -112,8 +113,17 @@ export default async function AccountPage() {
         </div>
 
         {/* Sign out */}
-        <div className="pb-12">
-          <SignOutButton />
+        <SignOutButton />
+
+        {/* Legal */}
+        <div className="flex justify-center gap-4 text-xs text-zinc-400">
+          <Link href="/privacy" className="hover:text-zinc-600 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-zinc-600 transition-colors">Terms of Service</Link>
+        </div>
+
+        {/* Delete account */}
+        <div className="pb-12 flex flex-col items-center gap-3">
+          <DeleteAccountButton />
         </div>
 
       </main>

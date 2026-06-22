@@ -103,14 +103,12 @@ export default function NewStoryPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-white font-semibold truncate">{rating.title}</p>
                   <p className="text-white/40 text-xs mt-0.5 capitalize">{rating.category}</p>
-                  {rating.review && (
-                    <p className="text-white/50 text-xs mt-1 truncate italic">"{rating.review}"</p>
-                  )}
-                </div>
-
-                <div className={`text-2xl font-black shrink-0 ${scoreColor(rating.score)}`}>
-                  {rating.score}
-                  <span className="text-sm font-normal text-white/30">/10</span>
+                  <p className="text-white/60 text-xs mt-1 truncate">
+                    <span className={`font-black mr-1 ${scoreColor(rating.score)}`}>
+                      {rating.score}<span className="text-white/30 font-normal">/10</span>
+                    </span>
+                    {rating.review && <span className="italic">"{rating.review}"</span>}
+                  </p>
                 </div>
 
                 {posting === rating.id && (

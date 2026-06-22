@@ -1,3 +1,8 @@
+export function isVideoUrl(url: string): boolean {
+  const lower = url.toLowerCase().split('?')[0]
+  return ['.mp4', '.mov', '.webm', '.m4v', '.avi'].some(ext => lower.endsWith(ext))
+}
+
 export function formatDistanceToNow(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()

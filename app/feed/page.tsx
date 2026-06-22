@@ -61,7 +61,7 @@ export default async function FeedPage() {
   return (
     <>
       <Navbar username={profile?.username ?? ''} />
-      <main className="max-w-lg mx-auto px-4 py-4">
+      <main className="max-w-lg md:max-w-2xl mx-auto px-4 py-4">
 
         {user && storyGroups.length > 0 && (
           <StoryBar groups={storyGroups} currentUser={profile} seenStoryIds={seenStoryIds} />
