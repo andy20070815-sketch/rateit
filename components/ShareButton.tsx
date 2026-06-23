@@ -8,6 +8,7 @@ import type { Rating } from '../lib/types'
 
 interface Props {
   rating: Pick<Rating, 'id' | 'title' | 'score'>
+  iconOnly?: boolean
 }
 
 const SITE = 'https://rateit-gamma.vercel.app'
@@ -20,7 +21,7 @@ function shareText(title: string, score: number) {
   return `${score}/10 — ${title}`
 }
 
-export default function ShareButton({ rating }: Props) {
+export default function ShareButton({ rating, iconOnly = false }: Props) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState<'og' | 'story' | null>(null)
@@ -125,10 +126,14 @@ export default function ShareButton({ rating }: Props) {
     <>
       <button
         onClick={handleShare}
-        className="flex items-center gap-1.5 text-xs text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+        className={iconOnly
+          ? 'bg-black/65 backdrop-blur-sm rounded-md p-1 text-white hover:bg-black/85 transition-colors'
+          : 'flex items-center gap-1.5 text-xs text-[var(--muted)] hover:text-[var(--ink)] transition-colors'
+        }
+        aria-label={t('label')}
       >
-        <Share2 size={14} />
-        {t('label')}
+        <Share2 size={iconOnly ? 11 : 14} />
+        {!iconOnly && <span>{t('label')}</span>}
       </button>
 
       {open && (
