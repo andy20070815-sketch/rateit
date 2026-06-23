@@ -45,6 +45,7 @@
     "count": "{count} 則留言"
   },
   "share": {
+    "label": "分享",
     "title": "分享這則評分",
     "copyLink": "複製連結",
     "copied": "已複製！",
@@ -85,28 +86,46 @@
     "terms": "服務條款",
     "contact": "聯絡我們"
   },
+  "search": {
+    "placeholder": "搜尋任何內容…",
+    "navPlaceholder": "搜尋電影、藝人、運動員…",
+    "seeAllFor": "查看「{query}」的所有結果",
+    "ratingCount": "{count} 則評分",
+    "searchAnything": "搜尋任何內容",
+    "searchHint": "電影、藝人、運動員、影集、遊戲或用戶…",
+    "nothingFound": "找不到「{query}」的結果",
+    "resultsFor": "「{query}」的搜尋結果",
+    "people": "用戶",
+    "content": "內容",
+    "rate": "評分"
+  },
+  "permalink": {
+    "commentsHeader": "留言",
+    "joinRateit": "加入 rateit 來評分 {title}。",
+    "rateYourself": "自己也來評分，免費，只要 10 秒",
+    "seeMoreFrom": "查看更多 @{username} 的評分 →"
+  },
+  "rate": {
+    "newRating": "新評分",
+    "cancel": "取消",
+    "itemLabel": "你要評什麼？",
+    "categoryLabel": "分類",
+    "scoreLabel": "分數",
+    "reviewLabel": "評論",
+    "reviewOptional": "（選填）",
+    "reviewPlaceholder": "你覺得如何？",
+    "photoLabel": "照片",
+    "photoOptional": "（選填）",
+    "changePhoto": "更換照片",
+    "addPhoto": "+ 新增照片",
+    "posting": "發布中…",
+    "post": "發布評分"
+  },
   "time": {
     "justNow": "剛才",
     "minsAgo": "{n} 分鐘前",
     "hoursAgo": "{n} 小時前",
     "daysAgo": "{n} 天前",
     "weeksAgo": "{n} 週前"
-  },
-  "search": {
-    "placeholder": "搜尋任何內容…",
-    "rate": "評分"
-  },
-  "explore": {
-    "title": "探索",
-    "topRated": "評分最高",
-    "trending": "熱門"
-  },
-  "rate": {
-    "title": "評分",
-    "itemName": "你要評什麼？",
-    "score": "分數",
-    "review": "評論（選填）",
-    "submit": "發布評分",
-    "submitting": "發布中…"
   }
 }

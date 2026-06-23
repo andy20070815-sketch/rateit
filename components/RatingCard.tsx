@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
 import { formatDistanceToNow, isVideoUrl } from '../lib/utils'
 import type { Rating } from '../lib/types'
-import { CATEGORY_LABELS } from '../lib/constants'
 import CategoryIcon from './CategoryIcon'
 import ExternalScores from './ExternalScores'
 import AutoImage from './AutoImage'
@@ -24,6 +24,9 @@ export default function RatingCard({ rating, showUser = true }: Props) {
   const [commentCount, setCommentCount] = useState<number | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [imgFailed, setImgFailed] = useState(false)
+  const tCat = useTranslations('categories')
+  const tComments = useTranslations('comments')
+  const locale = useLocale()
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null))
@@ -47,7 +50,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
             )}
           </div>
           <span className="text-sm font-semibold leading-none flex-1 text-[var(--ink)]">{rating.profiles.username}</span>
-          <span className="text-[11px] text-[var(--muted)]">{formatDistanceToNow(rating.created_at)}</span>
+          <span className="text-[11px] text-[var(--muted)]">{formatDistanceToNow(rating.created_at, locale)}</span>
         </Link>
       )}
 
@@ -77,7 +80,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
         <div className="flex items-center gap-1.5">
           <CategoryIcon category={rating.category} size={12} className="text-[var(--muted)]" />
           <span className="text-[11px] text-[var(--muted)] uppercase tracking-widest font-semibold">
-            {CATEGORY_LABELS[rating.category]}
+            {tCat(rating.category as Parameters<typeof tCat>[0])}
           </span>
         </div>
 
@@ -115,10 +118,10 @@ export default function RatingCard({ rating, showUser = true }: Props) {
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
             {showComments
-              ? 'Hide'
+              ? tComments('hide')
               : commentCount !== null
-                ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}`
-                : 'Comments'}
+                ? tComments('count', { count: commentCount })
+                : tComments('label')}
           </button>
           <ShareButton rating={rating} />
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import "./globals.css";
 import BottomNav from "../components/BottomNav";
 import Sidebar from "../components/Sidebar";
@@ -47,8 +47,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const [locale, messages, tFooter] = await Promise.all([
+    getLocale(),
+    getMessages(),
+    getTranslations('footer'),
+  ]);
 
   return (
     <html
@@ -63,9 +66,9 @@ export default async function RootLayout({
           <div className="flex-1 md:ml-60 pb-16 md:pb-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0px)' }}>
             {children}
             <footer className="max-w-lg md:max-w-2xl mx-auto px-4 py-6 flex justify-center gap-6 text-xs text-zinc-400">
-              <a href="/privacy" className="hover:text-zinc-600 transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-zinc-600 transition-colors">Terms of Service</a>
-              <a href="mailto:RateitAsk@gmail.com" className="hover:text-zinc-600 transition-colors">Contact</a>
+              <a href="/privacy" className="hover:text-zinc-600 transition-colors">{tFooter('privacy')}</a>
+              <a href="/terms" className="hover:text-zinc-600 transition-colors">{tFooter('terms')}</a>
+              <a href="mailto:RateitAsk@gmail.com" className="hover:text-zinc-600 transition-colors">{tFooter('contact')}</a>
             </footer>
           </div>
           {/* Bottom nav — hidden on desktop */}

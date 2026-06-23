@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Share2, X, Copy, Check, Download, ExternalLink } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { track } from '../lib/analytics'
 import type { Rating } from '../lib/types'
 
@@ -24,6 +25,7 @@ export default function ShareButton({ rating }: Props) {
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState<'og' | 'story' | null>(null)
   const [igHint, setIgHint] = useState(false)
+  const t = useTranslations('share')
 
   const isMobile = typeof navigator !== 'undefined' && 'share' in navigator
 
@@ -104,7 +106,7 @@ export default function ShareButton({ rating }: Props) {
         className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
       >
         <Share2 size={14} />
-        Share
+        {t('label')}
       </button>
 
       {/* Modal */}
@@ -117,7 +119,7 @@ export default function ShareButton({ rating }: Props) {
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <p className="font-semibold text-sm">Share this rating</p>
+              <p className="font-semibold text-sm">{t('title')}</p>
               <button onClick={() => setOpen(false)} className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors">
                 <X size={18} />
               </button>
@@ -142,12 +144,12 @@ export default function ShareButton({ rating }: Props) {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
               >
                 {copied ? <Check size={15} className="text-green-500" /> : <Copy size={15} />}
-                {copied ? 'Copied!' : 'Copy link'}
+                {copied ? t('copied') : t('copyLink')}
               </button>
 
               {/* Download */}
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Download image</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('downloadImage')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => downloadImage('og')}
@@ -155,7 +157,7 @@ export default function ShareButton({ rating }: Props) {
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
                   >
                     <Download size={12} />
-                    {downloading === 'og' ? 'Downloading…' : 'Card (1200×630)'}
+                    {downloading === 'og' ? t('downloading') : t('card')}
                   </button>
                   <button
                     onClick={() => downloadImage('story')}
@@ -163,14 +165,14 @@ export default function ShareButton({ rating }: Props) {
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
                   >
                     <Download size={12} />
-                    {downloading === 'story' ? 'Downloading…' : 'Story (1080×1920)'}
+                    {downloading === 'story' ? t('downloading') : t('story')}
                   </button>
                 </div>
               </div>
 
               {/* Social platforms */}
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Share to</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('shareTo')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => openPlatform('threads', `https://www.threads.net/intent/post?text=${text}%20${link}`)}
@@ -201,18 +203,18 @@ export default function ShareButton({ rating }: Props) {
 
               {/* Instagram */}
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Instagram</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t('instagram')}</p>
                 <button
                   onClick={downloadForInstagram}
                   disabled={downloading === 'story'}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
                 >
                   <Download size={12} />
-                  {downloading === 'story' ? 'Downloading…' : 'Download story image'}
+                  {downloading === 'story' ? t('downloading') : t('downloadStory')}
                 </button>
                 {igHint && (
                   <p className="text-xs text-zinc-500 text-center">
-                    Story image saved — open Instagram and post it
+                    {t('storyHint')}
                   </p>
                 )}
               </div>

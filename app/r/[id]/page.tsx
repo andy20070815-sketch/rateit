@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { createClient } from '../../../lib/supabase/server'
 import Navbar from '../../../components/Navbar'
 import AutoImage from '../../../components/AutoImage'
@@ -8,7 +9,6 @@ import CommentsSection from '../../../components/CommentsSection'
 import ShareButton from '../../../components/ShareButton'
 import ShareLandingTracker from '../../../components/ShareLandingTracker'
 import CategoryIcon from '../../../components/CategoryIcon'
-import { CATEGORY_LABELS } from '../../../lib/constants'
 import { formatDistanceToNow, isVideoUrl } from '../../../lib/utils'
 import type { Rating, Category } from '../../../lib/types'
 
@@ -65,6 +65,12 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
     viewerUsername = p?.username ?? ''
   }
 
+  const [tPermalink, tCat, locale] = await Promise.all([
+    getTranslations('permalink'),
+    getTranslations('categories'),
+    getLocale(),
+  ])
+
   const r = rating as Rating & { profiles: { id: string; username: string; avatar_url: string | null; full_name: string | null } | null }
   const username = r.profiles?.username ?? 'unknown'
   const isFromShare = ref === 'share'
@@ -99,7 +105,7 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
               </div>
               <div>
                 <p className="text-sm font-semibold leading-none">{username}</p>
-                <p className="text-xs text-zinc-500">{formatDistanceToNow(r.created_at)}</p>
+                <p className="text-xs text-zinc-500">{formatDistanceToNow(r.created_at, locale)}</p>
               </div>
             </Link>
           )}
@@ -117,7 +123,7 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
           <div className="flex items-center gap-1.5">
             <CategoryIcon category={r.category as Category} size={13} className="text-zinc-400" />
             <span className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
-              {CATEGORY_LABELS[r.category as Category]}
+              {tCat(r.category as Parameters<typeof tCat>[0])}
             </span>
           </div>
 
@@ -142,25 +148,25 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
 
         {/* Comments (always open on permalink) */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Comments</p>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">{tPermalink('commentsHeader')}</p>
           <CommentsSection ratingId={r.id} currentUserId={user?.id ?? null} />
         </div>
 
         {/* Logged-out CTA */}
         {!user && (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-5 space-y-3">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Join rateit to rate {r.title} yourself.</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{tPermalink('joinRateit', { title: r.title })}</p>
             <Link
               href={`/signup?ref=share&rid=${id}&from=${utm_source ?? 'link'}`}
               className="block w-full py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-xl text-center text-sm"
             >
-              Rate it yourself — free, 10 seconds
+              {tPermalink('rateYourself')}
             </Link>
             <Link
               href={`/profile/${username}`}
               className="block w-full text-center text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
             >
-              See more from @{username} →
+              {tPermalink('seeMoreFrom', { username })}
             </Link>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
 import { formatDistanceToNow } from '../lib/utils'
 
 interface Comment {
@@ -24,6 +25,8 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
   const [input, setInput] = useState('')
   const [posting, setPosting] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations('comments')
+  const locale = useLocale()
 
   useEffect(() => {
     fetch(`/api/comments?ratingId=${ratingId}`)
@@ -74,9 +77,9 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
   return (
     <div className="border-t border-[var(--line)] pt-3 space-y-3">
       {loading ? (
-        <p className="text-xs text-[var(--muted)] px-1">Loading comments…</p>
+        <p className="text-xs text-[var(--muted)] px-1">{t('loading')}</p>
       ) : comments.length === 0 ? (
-        <p className="text-xs text-[var(--muted)] px-1">No comments yet. Be first!</p>
+        <p className="text-xs text-[var(--muted)] px-1">{t('empty')}</p>
       ) : (
         <div className="space-y-2.5">
           {comments.map(c => (
@@ -99,7 +102,7 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
                   </Link>
                   <span className="text-[var(--muted)]">{c.content}</span>
                 </p>
-                <p className="text-[10px] text-[var(--muted)] mt-0.5">{formatDistanceToNow(c.created_at)}</p>
+                <p className="text-[10px] text-[var(--muted)] mt-0.5">{formatDistanceToNow(c.created_at, locale)}</p>
               </div>
               {currentUserId === c.user_id && (
                 <button
@@ -120,7 +123,7 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Add a comment…"
+            placeholder={t('placeholder')}
             maxLength={300}
             className="flex-1 text-xs bg-[var(--surface)] rounded-full px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[var(--line)] placeholder-[var(--muted)]"
           />
@@ -129,12 +132,12 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
             disabled={!input.trim() || posting}
             className="text-xs font-semibold text-[var(--ink)] disabled:opacity-30 transition-opacity"
           >
-            Post
+            {t('post')}
           </button>
         </form>
       ) : (
         <p className="text-xs text-[var(--muted)]">
-          <Link href="/login" className="font-semibold underline">Sign in</Link> to comment
+          <Link href="/login" className="font-semibold underline">{t('signIn')}</Link>{' '}{t('signInTo')}
         </p>
       )}
     </div>

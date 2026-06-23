@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { RefreshCw } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
 import RatingCard from './RatingCard'
-import { CATEGORIES, CATEGORY_LABELS } from '../lib/constants'
+import { CATEGORIES } from '../lib/constants'
 import CategoryIcon from './CategoryIcon'
 import { hasOnboarded, getPreferredCategories } from '../lib/preferences'
 import type { Rating, Category } from '../lib/types'
@@ -62,6 +63,8 @@ export default function FeedContent({ currentUserId }: Props) {
   const [feed, setFeed] = useState<Rating[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all')
+  const tCat = useTranslations('categories')
+  const tFeed = useTranslations('feed')
 
   // Redirect logged-in first-timers to onboarding
   useEffect(() => {
@@ -128,7 +131,7 @@ export default function FeedContent({ currentUserId }: Props) {
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
-              All
+              {tCat('all')}
             </button>
             {CATEGORIES.map(cat => (
               <button
@@ -140,7 +143,7 @@ export default function FeedContent({ currentUserId }: Props) {
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                 }`}
               >
-                <CategoryIcon category={cat} size={12} className="inline-block mr-1" />{CATEGORY_LABELS[cat]}
+                <CategoryIcon category={cat} size={12} className="inline-block mr-1" />{tCat(cat)}
               </button>
             ))}
           </div>
@@ -173,7 +176,11 @@ export default function FeedContent({ currentUserId }: Props) {
           </>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 col-span-full">
-            <p className="font-semibold text-zinc-500">No {activeCategory !== 'all' ? CATEGORY_LABELS[activeCategory as Category] : ''} ratings yet</p>
+            <p className="font-semibold text-zinc-500">
+              {activeCategory !== 'all'
+                ? tFeed('noRatingsCategory', { category: tCat(activeCategory as Category) })
+                : tFeed('noRatings')}
+            </p>
           </div>
         ) : (
           filtered.map(rating => (

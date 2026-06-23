@@ -45,6 +45,7 @@
     "count": "{count, plural, one {# comment} other {# comments}}"
   },
   "share": {
+    "label": "Share",
     "title": "Share this rating",
     "copyLink": "Copy link",
     "copied": "Copied!",
@@ -85,28 +86,46 @@
     "terms": "Terms of Service",
     "contact": "Contact"
   },
+  "search": {
+    "placeholder": "Search anything…",
+    "navPlaceholder": "Search movies, artists, athletes…",
+    "seeAllFor": "See all results for \"{query}\"",
+    "ratingCount": "{count, plural, one {# rating} other {# ratings}}",
+    "searchAnything": "Search anything",
+    "searchHint": "Movies, artists, athletes, shows, games, or people…",
+    "nothingFound": "Nothing found for \"{query}\"",
+    "resultsFor": "Results for \"{query}\"",
+    "people": "People",
+    "content": "Content",
+    "rate": "Rate"
+  },
+  "permalink": {
+    "commentsHeader": "Comments",
+    "joinRateit": "Join rateit to rate {title} yourself.",
+    "rateYourself": "Rate it yourself — free, 10 seconds",
+    "seeMoreFrom": "See more from @{username} →"
+  },
+  "rate": {
+    "newRating": "New Rating",
+    "cancel": "Cancel",
+    "itemLabel": "What are you rating?",
+    "categoryLabel": "Category",
+    "scoreLabel": "Score",
+    "reviewLabel": "Review",
+    "reviewOptional": "(optional)",
+    "reviewPlaceholder": "What did you think?",
+    "photoLabel": "Photo",
+    "photoOptional": "(optional)",
+    "changePhoto": "Change photo",
+    "addPhoto": "+ Add photo",
+    "posting": "Posting…",
+    "post": "Post Rating"
+  },
   "time": {
     "justNow": "just now",
     "minsAgo": "{n}m ago",
     "hoursAgo": "{n}h ago",
     "daysAgo": "{n}d ago",
     "weeksAgo": "{n}w ago"
-  },
-  "search": {
-    "placeholder": "Search anything…",
-    "rate": "Rate"
-  },
-  "explore": {
-    "title": "Explore",
-    "topRated": "Top rated",
-    "trending": "Trending"
-  },
-  "rate": {
-    "title": "Rate something",
-    "itemName": "What are you rating?",
-    "score": "Score",
-    "review": "Review (optional)",
-    "submit": "Post rating",
-    "submitting": "Posting…"
   }
 }

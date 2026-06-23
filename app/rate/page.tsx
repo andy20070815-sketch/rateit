@@ -4,8 +4,9 @@ export const dynamic = 'force-dynamic'
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '../../lib/supabase/client'
-import { CATEGORIES, CATEGORY_LABELS } from '../../lib/constants'
+import { CATEGORIES } from '../../lib/constants'
 import CategoryIcon from '../../components/CategoryIcon'
 import type { Category } from '../../lib/types'
 import TitleSearch from '../../components/TitleSearch'
@@ -21,6 +22,8 @@ export default function RatePage() {
 function RateForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations('rate')
+  const tCat = useTranslations('categories')
 
   const [title, setTitle] = useState(searchParams.get('title') ?? '')
   const [category, setCategory] = useState<Category>((searchParams.get('category') as Category) ?? 'movie')
@@ -94,8 +97,8 @@ function RateForm() {
     <>
       <div className="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="font-bold text-lg">New Rating</h1>
-          <button onClick={() => router.back()} className="text-sm text-zinc-500">Cancel</button>
+          <h1 className="font-bold text-lg">{t('newRating')}</h1>
+          <button onClick={() => router.back()} className="text-sm text-zinc-500">{t('cancel')}</button>
         </div>
       </div>
 
@@ -103,7 +106,7 @@ function RateForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Title */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">What are you rating?</label>
+            <label className="text-sm font-medium">{t('itemLabel')}</label>
             <TitleSearch
               category={category}
               value={title}
@@ -118,7 +121,7 @@ function RateForm() {
 
           {/* Category */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Category</label>
+            <label className="text-sm font-medium">{t('categoryLabel')}</label>
             <div className="grid grid-cols-3 gap-2">
               {CATEGORIES.map((cat) => (
                 <button
@@ -131,7 +134,7 @@ function RateForm() {
                       : 'border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  <CategoryIcon category={cat} size={13} className="inline-block mr-1.5" />{CATEGORY_LABELS[cat]}
+                  <CategoryIcon category={cat} size={13} className="inline-block mr-1.5" />{tCat(cat as Parameters<typeof tCat>[0])}
                 </button>
               ))}
             </div>
@@ -140,7 +143,7 @@ function RateForm() {
           {/* Score */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium">
-              Score: <span className="text-2xl font-black">{score}</span>
+              {t('scoreLabel')}: <span className="text-2xl font-black">{score}</span>
               <span className="text-zinc-400 font-normal">/10</span>
             </label>
             <input
@@ -160,9 +163,9 @@ function RateForm() {
 
           {/* Review */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Review <span className="text-zinc-400 font-normal">(optional)</span></label>
+            <label className="text-sm font-medium">{t('reviewLabel')} <span className="text-zinc-400 font-normal">{t('reviewOptional')}</span></label>
             <textarea
-              placeholder="What did you think?"
+              placeholder={t('reviewPlaceholder')}
               value={review}
               onChange={(e) => setReview(e.target.value)}
               rows={3}
@@ -173,12 +176,12 @@ function RateForm() {
 
           {/* Image */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Photo <span className="text-zinc-400 font-normal">(optional)</span></label>
+            <label className="text-sm font-medium">{t('photoLabel')} <span className="text-zinc-400 font-normal">{t('photoOptional')}</span></label>
             {imagePreview && (
               <img src={imagePreview} alt="preview" className="w-full rounded-xl object-cover max-h-48" />
             )}
             <label className="flex items-center justify-center w-full py-3 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 text-sm text-zinc-500 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900">
-              {imagePreview ? 'Change photo' : '+ Add photo'}
+              {imagePreview ? t('changePhoto') : t('addPhoto')}
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
           </div>
@@ -190,7 +193,7 @@ function RateForm() {
             disabled={loading}
             className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-xl text-sm disabled:opacity-50"
           >
-            {loading ? 'Posting…' : 'Post Rating'}
+            {loading ? t('posting') : t('post')}
           </button>
         </form>
       </main>

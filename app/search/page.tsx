@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { Search } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '../../lib/supabase/server'
 import Navbar from '../../components/Navbar'
 import ExternalSearchResults from '../../components/ExternalSearchResults'
 import SearchResultImage from '../../components/SearchResultImage'
 import CategoryIcon from '../../components/CategoryIcon'
 import SearchBar from '../../components/SearchBar'
-import { CATEGORY_LABELS } from '../../lib/constants'
 import type { Category } from '../../lib/types'
 
 interface Props {
@@ -33,6 +33,11 @@ interface ProfileResult {
 export default async function SearchPage({ searchParams }: Props) {
   const { q = '' } = await searchParams
   const query = q.trim()
+
+  const [tSearch, tCat] = await Promise.all([
+    getTranslations('search'),
+    getTranslations('categories'),
+  ])
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -129,26 +134,26 @@ export default async function SearchPage({ searchParams }: Props) {
         {!query ? (
           <div className="flex flex-col items-center py-16 gap-3 text-zinc-400">
             <Search size={36} strokeWidth={1.5} />
-            <p className="font-semibold text-zinc-700 dark:text-zinc-300">Search anything</p>
-            <p className="text-sm text-center">Movies, artists, athletes, shows, games, or people…</p>
+            <p className="font-semibold text-zinc-700 dark:text-zinc-300">{tSearch('searchAnything')}</p>
+            <p className="text-sm text-center">{tSearch('searchHint')}</p>
           </div>
         ) : !hasResults ? (
           <div className="space-y-4">
             <div className="flex flex-col items-center py-8 gap-2 text-zinc-400">
-              <p className="font-semibold text-zinc-700 dark:text-zinc-300">Nothing found for &ldquo;{query}&rdquo;</p>
+              <p className="font-semibold text-zinc-700 dark:text-zinc-300">{tSearch('nothingFound', { query })}</p>
             </div>
             <ExternalSearchResults q={query} existingTitles={[]} />
           </div>
         ) : (
           <>
             <h1 className="font-black text-xl">
-              Results for &ldquo;{query}&rdquo;
+              {tSearch('resultsFor', { query })}
             </h1>
 
             {/* People */}
             {peopleResults.length > 0 && (
               <section className="space-y-2">
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">People</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{tSearch('people')}</p>
                 <div className="space-y-2">
                   {peopleResults.map(p => (
                     <div
@@ -168,7 +173,7 @@ export default async function SearchPage({ searchParams }: Props) {
                           <p className="text-sm text-zinc-500">
                             @{p.username}
                             {p.ratingCount > 0 && (
-                              <span className="ml-2">{p.ratingCount} {p.ratingCount === 1 ? 'rating' : 'ratings'}</span>
+                              <span className="ml-2">{tSearch('ratingCount', { count: p.ratingCount })}</span>
                             )}
                           </p>
                         </div>
@@ -177,7 +182,7 @@ export default async function SearchPage({ searchParams }: Props) {
                         href={`/rate?title=${encodeURIComponent('@' + p.username)}&category=person`}
                         className="shrink-0 px-3 py-1.5 rounded-lg bg-black dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-80 transition-opacity"
                       >
-                        Rate
+                        {tSearch('rate')}
                       </Link>
                     </div>
                   ))}
@@ -189,7 +194,7 @@ export default async function SearchPage({ searchParams }: Props) {
             {contentResults.length > 0 && (
               <section className="space-y-2">
                 {peopleResults.length > 0 && (
-                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Content</p>
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{tSearch('content')}</p>
                 )}
                 <div className="space-y-3">
                   {contentResults.map(r => (
@@ -209,11 +214,11 @@ export default async function SearchPage({ searchParams }: Props) {
                           {r.allCategories.map(cat => (
                             <span key={cat} className="flex items-center gap-1 text-xs text-zinc-500">
                               <CategoryIcon category={cat} size={11} className="text-zinc-400" />
-                              {CATEGORY_LABELS[cat]}
+                              {tCat(cat as Parameters<typeof tCat>[0])}
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-zinc-400 mt-1">{r.count} {r.count === 1 ? 'rating' : 'ratings'}</p>
+                        <p className="text-xs text-zinc-400 mt-1">{tSearch('ratingCount', { count: r.count })}</p>
                       </div>
                       <div className={`text-3xl font-black shrink-0 ${scoreColor(r.avg)}`}>
                         {Math.round(r.avg * 10) / 10}

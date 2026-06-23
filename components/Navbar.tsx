@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '../lib/supabase/client'
-import { CATEGORY_LABELS } from '../lib/constants'
 import CategoryIcon from './CategoryIcon'
 import type { Category } from '../lib/types'
 
@@ -20,6 +20,9 @@ interface Suggestion {
 export default function Navbar({ username }: { username: string }) {
   const router = useRouter()
   const isLoggedIn = !!username
+  const tSearch = useTranslations('search')
+  const tCat = useTranslations('categories')
+  const tAuth = useTranslations('auth')
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -142,7 +145,7 @@ export default function Navbar({ username }: { username: string }) {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                placeholder="Search movies, artists, athletes…"
+                placeholder={tSearch('navPlaceholder')}
                 className="flex-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl px-4 py-2 text-sm focus:outline-none"
               />
               <button
@@ -187,8 +190,8 @@ export default function Navbar({ username }: { username: string }) {
                       <p className="text-sm font-semibold truncate">{s.title}</p>
                       <p className="text-xs text-zinc-400 flex items-center gap-1">
                         <CategoryIcon category={s.primaryCategory} size={11} className="text-zinc-400" />
-                        {CATEGORY_LABELS[s.primaryCategory]}
-                        {' · '}{s.count} {s.count === 1 ? 'rating' : 'ratings'}
+                        {tCat(s.primaryCategory as Parameters<typeof tCat>[0])}
+                        {' · '}{tSearch('ratingCount', { count: s.count })}
                       </p>
                     </div>
                     <span className={`text-base font-black shrink-0 ${scoreColor(s.avg)}`}>
@@ -204,7 +207,7 @@ export default function Navbar({ username }: { username: string }) {
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-t border-zinc-100 dark:border-zinc-800 transition-colors"
                 >
                   <Search size={12} />
-                  See all results for &ldquo;{searchQuery}&rdquo;
+                  {tSearch('seeAllFor', { query: searchQuery })}
                 </button>
               </div>
             )}
@@ -226,7 +229,7 @@ export default function Navbar({ username }: { username: string }) {
 
               {!isLoggedIn && (
                 <Link href="/login" className="px-3 py-1.5 text-sm font-semibold bg-black dark:bg-white text-white dark:text-black rounded-xl">
-                  Sign in
+                  {tAuth('signIn')}
                 </Link>
               )}
             </div>

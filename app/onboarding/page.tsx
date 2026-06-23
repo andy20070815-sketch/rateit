@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import CategoryIcon from '../../components/CategoryIcon'
-import { CATEGORIES, CATEGORY_LABELS } from '../../lib/constants'
+import { CATEGORIES } from '../../lib/constants'
 import { setPreferredCategories } from '../../lib/preferences'
 import type { Category } from '../../lib/types'
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const t = useTranslations('onboarding')
+  const tCat = useTranslations('categories')
   const [selected, setSelected] = useState<Category[]>([])
 
   function toggle(cat: Category) {
@@ -29,13 +32,13 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">What do you love?</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">{t('title')}</h1>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
             {selected.length === 0
-              ? 'Pick at least 3 categories to personalize your feed.'
+              ? t('pickAtLeast')
               : remaining > 0
-              ? `Pick ${remaining} more to personalize your feed.`
-              : 'Your feed is ready to go.'}
+              ? t('pickMore', { remaining })
+              : t('ready')}
           </p>
         </div>
 
@@ -54,7 +57,7 @@ export default function OnboardingPage() {
                 }`}
               >
                 <CategoryIcon category={cat} size={24} strokeWidth={1.5} />
-                {CATEGORY_LABELS[cat]}
+                {tCat(cat as Parameters<typeof tCat>[0])}
               </button>
             )
           })}
@@ -67,8 +70,8 @@ export default function OnboardingPage() {
           className="w-full py-3.5 rounded-2xl font-semibold text-sm bg-black dark:bg-white text-white dark:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
         >
           {selected.length < 3
-            ? 'Select at least 3 categories'
-            : `Continue with ${selected.length} categories`}
+            ? t('selectAtLeast')
+            : t('continue', { count: selected.length })}
         </button>
 
         {/* Skip */}
@@ -79,7 +82,7 @@ export default function OnboardingPage() {
           }}
           className="w-full mt-3 py-2 text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
         >
-          Skip for now
+          {t('skip')}
         </button>
       </div>
     </div>
