@@ -13,6 +13,22 @@ function scoreColor(s: number) {
   return s >= 8 ? '#22c55e' : s >= 5 ? '#eab308' : '#ef4444'
 }
 
+async function fetchArtworkDataUrl(url: string | null): Promise<string | null> {
+  if (!url) return null
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return null
+    const buf = await res.arrayBuffer()
+    const bytes = new Uint8Array(buf)
+    let binary = ''
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+    const mime = res.headers.get('content-type') ?? 'image/jpeg'
+    return `data:${mime};base64,${btoa(binary)}`
+  } catch {
+    return null
+  }
+}
+
 async function loadInterBold(): Promise<ArrayBuffer | null> {
   try {
     const css = await fetch(
@@ -57,11 +73,13 @@ export async function GET(
   const title = rating?.title ?? 'Rating'
   const score = rating?.score ?? 0
   const review = rating?.review ?? null
-  const imageUrl = rating?.image_url ?? null
   const username = rating?.profiles?.username ?? null
   const category = rating?.category ?? 'other'
   const color = scoreColor(score)
   const catLabel = CAT_LABELS[category] ?? 'Other'
+
+  // Pre-fetch artwork as data URL so Satori doesn't make external requests
+  const artworkDataUrl = await fetchArtworkDataUrl(rating?.image_url ?? null)
 
   const fonts = fontData
     ? [{ name: 'Inter', data: fontData, weight: 700 as const, style: 'normal' as const }]
@@ -72,8 +90,8 @@ export async function GET(
     ? (review.length > 100 ? review.slice(0, 100) + '…' : review)
     : null
 
-  const artworkContent = imageUrl
-    ? e('img', { src: imageUrl, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover' } } as React.ImgHTMLAttributes<HTMLImageElement> & { style: React.CSSProperties })
+  const artworkContent = artworkDataUrl
+    ? e('img', { src: artworkDataUrl, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover' } } as React.ImgHTMLAttributes<HTMLImageElement> & { style: React.CSSProperties })
     : e('div', { style: { display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 20 } },
         e('div', { style: { fontSize: 120, color: '#3f3f46', fontWeight: 700 } }, catLabel)
       )
