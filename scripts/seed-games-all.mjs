@@ -516,32 +516,47 @@ const GAMES = [
   ['Paradise Killer'],
 ]
 
-const REVIEWS = [
-  'Spent 300 hours in this. Worth every second.',
-  'Finished it in a week. Immediately started again.',
-  'Genuinely one of the best games ever made.',
-  'Broken at launch. Still played 200 hours.',
-  'The world-building is unmatched.',
-  'Addictive in the best possible way.',
-  'Overrated by the community. It\'s fine.',
-  'The story made me emotional. In a game. Wild.',
-  'Peak gaming. Nothing comes close.',
-  'Couldn\'t put the controller down.',
-  'My childhood in a game. Pure nostalgia.',
-  'The mechanics alone make it worth it.',
-  'Everyone should play this at least once.',
-  'Hard carry by the art direction.',
-  'Fell off after the first few hours sadly.',
-  'The multiplayer alone justifies the price.',
-  'Single-player goat. Multiplayer mid.',
-  'This defined my entire generation.',
-  'Soundtrack alone is a masterpiece.',
-  'More replayable than anything else I own.',
-  null,
-]
-
+const REVIEWS = {
+  positive: [
+    'Spent 300 hours in this. Worth every second.',
+    'Finished it in a week. Immediately started again.',
+    'Genuinely one of the best games ever made.',
+    'The world-building is unmatched.',
+    'Addictive in the best possible way.',
+    'The story made me emotional. In a game. Wild.',
+    'Peak gaming. Nothing comes close.',
+    "Couldn't put the controller down.",
+    'My childhood in a game. Pure nostalgia.',
+    'The mechanics alone make it worth it.',
+    'Everyone should play this at least once.',
+    'Hard carry by the art direction.',
+    'The multiplayer alone justifies the price.',
+    'This defined my entire generation.',
+    'Soundtrack alone is a masterpiece.',
+    'More replayable than anything else I own.',
+  ],
+  neutral: [
+    'Broken at launch. Still played 200 hours.',
+    'Single-player goat. Multiplayer mid.',
+  ],
+  negative: [
+    "Overrated by the community. It's fine.",
+    'Fell off after the first few hours sadly.',
+  ],
+}
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
-function randScore() { return Math.floor(Math.random() * 10) + 1 }
+function pickReview(score) {
+  const pool = score >= 7 ? REVIEWS.positive : score <= 4 ? REVIEWS.negative : REVIEWS.neutral
+  const arr = [...pool, null]
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+function randScore() {
+  const weights = [1, 1, 2, 3, 4, 5, 6, 5, 3, 1]
+  const total = weights.reduce((a, b) => a + b, 0)
+  let r = Math.random() * total
+  for (let i = 0; i < weights.length; i++) { r -= weights[i]; if (r <= 0) return i + 1 }
+  return 7
+}
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
@@ -591,14 +606,10 @@ async function run() {
     await sleep(100)
 
     const raters = shuffle(botIds).slice(0, 4 + Math.floor(Math.random() * 6))
-    const rows = raters.map(userId => ({
-      user_id: userId,
-      title: displayTitle,
-      category: 'game',
-      score: randScore(),
-      review: pick(REVIEWS),
-      image_url: imageUrl,
-    }))
+    const rows = raters.map(userId => {
+      const score = randScore()
+      return { user_id: userId, title: displayTitle, category: 'game', score, review: pickReview(score), image_url: imageUrl }
+    })
 
     const { error } = await supabase.from('ratings').insert(rows)
     if (error) {

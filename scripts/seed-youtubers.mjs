@@ -127,27 +127,44 @@ const YOUTUBERS = [
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
+function randScore() {
+  const weights = [1, 1, 2, 3, 4, 5, 6, 5, 3, 1]
+  const total = weights.reduce((a, b) => a + b, 0)
+  let r = Math.random() * total
+  for (let i = 0; i < weights.length; i++) { r -= weights[i]; if (r <= 0) return i + 1 }
+  return 7
+}
 
-const REVIEWS = [
-  'The production quality on this is genuinely insane.',
-  'Peak content. Nothing else comes close.',
-  'Fell off hard. Not the same creator anymore.',
-  'This channel genuinely taught me things I use every day.',
-  'I don\'t trust people who don\'t watch this.',
-  'The editing alone deserves an award.',
-  'Criminally underrated. More people need to see this.',
-  'Overhyped. It\'s just okay.',
-  'I\'ve rewatched this more times than I can count.',
-  'The algorithm blessed me the day it recommended this.',
-  'This is why YouTube was invented.',
-  'Somehow keeps getting better every upload.',
-  'The fanbase is insufferable but the content is elite.',
-  'Parasocial relationship speedrun any%.',
-  'This creator is the reason my attention span is destroyed.',
-  'Consistently delivering. Never misses.',
-  'Started watching in middle school. Still here.',
-  null
-]
+const REVIEWS = {
+  positive: [
+    'The production quality on this is genuinely insane.',
+    'Peak content. Nothing else comes close.',
+    'This channel genuinely taught me things I use every day.',
+    "I don't trust people who don't watch this.",
+    'The editing alone deserves an award.',
+    'Criminally underrated. More people need to see this.',
+    "I've rewatched this more times than I can count.",
+    'The algorithm blessed me the day it recommended this.',
+    'This is why YouTube was invented.',
+    'Somehow keeps getting better every upload.',
+    'The fanbase is insufferable but the content is elite.',
+    'Consistently delivering. Never misses.',
+    'Started watching in middle school. Still here.',
+  ],
+  neutral: [
+    'Parasocial relationship speedrun any%.',
+    'This creator is the reason my attention span is destroyed.',
+  ],
+  negative: [
+    'Fell off hard. Not the same creator anymore.',
+    "Overhyped. It's just okay.",
+  ],
+}
+function pickReview(score) {
+  const pool = score >= 7 ? REVIEWS.positive : score <= 4 ? REVIEWS.negative : REVIEWS.neutral
+  const arr = [...pool, null]
+  return arr[Math.floor(Math.random() * arr.length)]
+}
 
 async function fetchChannelByHandle(handle) {
   const url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent('@' + handle)}&key=${YT_KEY}`
@@ -201,14 +218,10 @@ async function run() {
     const title = display
 
     const raters = shuffle(botIds).slice(0, 5 + Math.floor(Math.random() * 6))
-    const rows = raters.map(userId => ({
-      user_id: userId,
-      title,
-      category: 'youtube',
-      score: Math.floor(Math.random() * 10) + 1,
-      review: pick(REVIEWS),
-      image_url: channel.thumbnail,
-    }))
+    const rows = raters.map(userId => {
+      const score = randScore()
+      return { user_id: userId, title, category: 'youtube', score, review: pickReview(score), image_url: channel.thumbnail }
+    })
 
     const { error } = await supabase.from('ratings').insert(rows)
     if (error) {
