@@ -15,9 +15,10 @@ interface Comment {
 interface Props {
   ratingId: string
   currentUserId: string | null
+  onCountChange?: (count: number) => void
 }
 
-export default function CommentsSection({ ratingId, currentUserId }: Props) {
+export default function CommentsSection({ ratingId, currentUserId, onCountChange }: Props) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
   const [input, setInput] = useState('')
@@ -27,7 +28,12 @@ export default function CommentsSection({ ratingId, currentUserId }: Props) {
   useEffect(() => {
     fetch(`/api/comments?ratingId=${ratingId}`)
       .then(r => r.json())
-      .then(d => { setComments(d.comments || []); setLoading(false) })
+      .then(d => {
+        const loaded = d.comments || []
+        setComments(loaded)
+        setLoading(false)
+        onCountChange?.(loaded.length)
+      })
   }, [ratingId])
 
   async function handlePost(e: React.FormEvent) {
@@ -42,7 +48,11 @@ export default function CommentsSection({ ratingId, currentUserId }: Props) {
     })
     const data = await res.json()
     if (data.comment) {
-      setComments(prev => [...prev, data.comment])
+      setComments(prev => {
+        const next = [...prev, data.comment]
+        onCountChange?.(next.length)
+        return next
+      })
       setInput('')
     }
     setPosting(false)
@@ -54,25 +64,29 @@ export default function CommentsSection({ ratingId, currentUserId }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ commentId }),
     })
-    setComments(prev => prev.filter(c => c.id !== commentId))
+    setComments(prev => {
+      const next = prev.filter(c => c.id !== commentId)
+      onCountChange?.(next.length)
+      return next
+    })
   }
 
   return (
-    <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3 space-y-3">
+    <div className="border-t border-[var(--line)] pt-3 space-y-3">
       {loading ? (
-        <p className="text-xs text-zinc-400 px-1">Loading comments…</p>
+        <p className="text-xs text-[var(--muted)] px-1">Loading comments…</p>
       ) : comments.length === 0 ? (
-        <p className="text-xs text-zinc-400 px-1">No comments yet. Be first!</p>
+        <p className="text-xs text-[var(--muted)] px-1">No comments yet. Be first!</p>
       ) : (
         <div className="space-y-2.5">
           {comments.map(c => (
             <div key={c.id} className="flex items-start gap-2 group">
               <Link href={`/profile/${c.profiles.username}`}>
-                <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 overflow-hidden">
+                <div className="w-6 h-6 rounded-full bg-[var(--surface)] flex-shrink-0 overflow-hidden">
                   {c.profiles.avatar_url ? (
                     <img src={c.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-500">
+                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--muted)]">
                       {c.profiles.username[0].toUpperCase()}
                     </div>
                   )}
@@ -83,14 +97,14 @@ export default function CommentsSection({ ratingId, currentUserId }: Props) {
                   <Link href={`/profile/${c.profiles.username}`} className="font-semibold hover:underline mr-1">
                     {c.profiles.username}
                   </Link>
-                  <span className="text-zinc-700 dark:text-zinc-300">{c.content}</span>
+                  <span className="text-[var(--muted)]">{c.content}</span>
                 </p>
-                <p className="text-[10px] text-zinc-400 mt-0.5">{formatDistanceToNow(c.created_at)}</p>
+                <p className="text-[10px] text-[var(--muted)] mt-0.5">{formatDistanceToNow(c.created_at)}</p>
               </div>
               {currentUserId === c.user_id && (
                 <button
                   onClick={() => handleDelete(c.id)}
-                  className="opacity-0 group-hover:opacity-100 text-[10px] text-zinc-400 hover:text-red-400 transition-all flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 text-[10px] text-[var(--muted)] hover:text-red-400 transition-all flex-shrink-0"
                 >
                   ✕
                 </button>
@@ -108,18 +122,18 @@ export default function CommentsSection({ ratingId, currentUserId }: Props) {
             onChange={e => setInput(e.target.value)}
             placeholder="Add a comment…"
             maxLength={300}
-            className="flex-1 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 placeholder-zinc-400"
+            className="flex-1 text-xs bg-[var(--surface)] rounded-full px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[var(--line)] placeholder-[var(--muted)]"
           />
           <button
             type="submit"
             disabled={!input.trim() || posting}
-            className="text-xs font-semibold text-black dark:text-white disabled:opacity-30 transition-opacity"
+            className="text-xs font-semibold text-[var(--ink)] disabled:opacity-30 transition-opacity"
           >
             Post
           </button>
         </form>
       ) : (
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-[var(--muted)]">
           <Link href="/login" className="font-semibold underline">Sign in</Link> to comment
         </p>
       )}

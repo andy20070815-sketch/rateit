@@ -20,7 +20,8 @@ interface Props {
 export default function RatingCard({ rating, showUser = true }: Props) {
   const score = rating.score
   const contentHref = `/content/${rating.category}/${encodeURIComponent(rating.title)}`
-  const [showComments, setShowComments] = useState(true)
+  const [showComments, setShowComments] = useState(false)
+  const [commentCount, setCommentCount] = useState<number | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [imgFailed, setImgFailed] = useState(false)
 
@@ -34,91 +35,98 @@ export default function RatingCard({ rating, showUser = true }: Props) {
     'text-red-500'
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
+    <div className="bg-[var(--paper)] rounded-2xl border border-[var(--line)] overflow-hidden">
+      {/* Author */}
       {showUser && rating.profiles && (
-        <Link href={`/profile/${rating.profiles.username}`} className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center text-sm font-bold">
+        <Link href={`/profile/${rating.profiles.username}`} className="flex items-center gap-2.5 px-4 pt-4">
+          <div className="w-7 h-7 rounded-full bg-[var(--surface)] overflow-hidden flex items-center justify-center text-xs font-bold flex-shrink-0">
             {rating.profiles.avatar_url ? (
               <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" />
             ) : (
               rating.profiles.username[0].toUpperCase()
             )}
           </div>
-          <div>
-            <p className="text-sm font-semibold leading-none">{rating.profiles.username}</p>
-            <p className="text-xs text-zinc-500">{formatDistanceToNow(rating.created_at)}</p>
-          </div>
+          <span className="text-sm font-semibold leading-none flex-1 text-[var(--ink)]">{rating.profiles.username}</span>
+          <span className="text-[11px] text-[var(--muted)]">{formatDistanceToNow(rating.created_at)}</span>
         </Link>
       )}
 
-      <div>
+      {/* Artwork — 16:10 */}
+      <div className={`${showUser && rating.profiles ? 'mt-3' : ''} aspect-[16/10] w-full overflow-hidden`}>
         {rating.image_url && isVideoUrl(rating.image_url) ? (
-          <video
-            src={rating.image_url}
-            className="w-full rounded-xl max-h-64"
-            controls
-            playsInline
-            muted
-            loop
-          />
+          <video src={rating.image_url} className="w-full h-full object-cover" controls playsInline muted loop />
         ) : (rating.image_url && !imgFailed) ? (
-          <Link href={contentHref}>
+          <Link href={contentHref} className="block w-full h-full">
             <img
               src={rating.image_url}
               alt={rating.title}
-              className="w-full rounded-xl object-cover max-h-64"
+              className="w-full h-full object-cover"
               onError={() => setImgFailed(true)}
             />
           </Link>
         ) : (
-          <Link href={contentHref}>
-            <AutoImage
-              title={rating.title}
-              category={rating.category}
-              className="w-full max-h-64 h-48"
-              ratingId={rating.id}
-            />
+          <Link href={contentHref} className="block w-full h-full">
+            <AutoImage title={rating.title} category={rating.category} className="w-full h-full" ratingId={rating.id} />
           </Link>
         )}
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <CategoryIcon category={rating.category} size={13} className="text-zinc-400" />
-        <span className="text-xs text-zinc-500 uppercase tracking-wide font-medium">
-          {CATEGORY_LABELS[rating.category]}
-        </span>
+      {/* Content */}
+      <div className="px-4 pt-3 pb-4 space-y-2">
+        {/* Category */}
+        <div className="flex items-center gap-1.5">
+          <CategoryIcon category={rating.category} size={12} className="text-[var(--muted)]" />
+          <span className="text-[11px] text-[var(--muted)] uppercase tracking-widest font-semibold">
+            {CATEGORY_LABELS[rating.category]}
+          </span>
+        </div>
+
+        {/* Title */}
+        <Link href={contentHref} className="block text-[15px] font-semibold text-[var(--ink)] hover:opacity-70 transition-opacity leading-snug">
+          {rating.title}
+        </Link>
+
+        {/* Score + review */}
+        <div className="space-y-1">
+          <div className="flex items-baseline gap-1.5">
+            <span
+              className={`text-[52px] font-black leading-none tabular-nums ${scoreColor}`}
+              style={{ fontFamily: 'var(--font-space-grotesk, var(--font-sans))' }}
+            >
+              {score}
+            </span>
+            <span className="text-sm text-[var(--muted)] font-medium">/10</span>
+          </div>
+          {rating.review && (
+            <p className="text-sm text-[var(--muted)] leading-relaxed">{rating.review}</p>
+          )}
+        </div>
+
+        {/* External scores */}
+        <ExternalScores title={rating.title} category={rating.category} />
+
+        {/* Action row */}
+        <div className="flex items-center justify-between pt-1">
+          <button
+            onClick={() => setShowComments(v => !v)}
+            className="flex items-center gap-1.5 text-xs text-[var(--muted)] hover:text-[var(--ink)] transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            {showComments
+              ? 'Hide'
+              : commentCount !== null
+                ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}`
+                : 'Comments'}
+          </button>
+          <ShareButton rating={rating} />
+        </div>
+
+        {showComments && (
+          <CommentsSection ratingId={rating.id} currentUserId={currentUserId} onCountChange={setCommentCount} />
+        )}
       </div>
-
-      <Link href={contentHref} className="font-semibold text-base hover:underline leading-snug">
-        {rating.title}
-      </Link>
-
-      <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-        <span className={`text-xl font-black ${scoreColor} mr-1`}>
-          {score}<span className="text-xs font-normal text-zinc-400">/10</span>
-        </span>
-        {rating.review}
-      </p>
-
-      <ExternalScores title={rating.title} category={rating.category} />
-
-      {/* Comment toggle + share */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setShowComments(v => !v)}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-          {showComments ? 'Hide comments' : 'View comments'}
-        </button>
-        <ShareButton rating={rating} />
-      </div>
-
-      {showComments && (
-        <CommentsSection ratingId={rating.id} currentUserId={currentUserId} />
-      )}
     </div>
   )
 }

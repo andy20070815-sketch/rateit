@@ -131,91 +131,156 @@ const CONTENT = {
 }
 
 const REVIEWS = {
-  movie: [
-    'Genuinely one of the best films ever made.',
-    'Overrated. I don\'t get the hype at all.',
-    'Watched it 5 times and it only gets better.',
-    'The cinematography alone deserves a 10.',
-    'Good but not great. People oversell this.',
-    'Changed how I think about cinema.',
-    'Slept on it. Woke up. Still thinking about it.',
-    'Peak filmmaking. Nothing comes close.',
-    'I cried. I don\'t cry at movies. This is it.',
-    null
-  ],
-  tv: [
-    'Best show I\'ve ever watched. Peak television.',
-    'Started strong, fell off hard by season 3.',
-    'Every episode leaves me wanting more.',
-    'The writing is on another level.',
-    'Overrated by the internet. It\'s just okay.',
-    'Binged the whole thing in a weekend. No regrets.',
-    'The characters are what make this special.',
-    'Cancelled too soon. I\'m still not over it.',
-    null
-  ],
-  sport: [
-    'The greatest to ever do it. Full stop.',
-    'Overrated. Stats don\'t tell the whole story.',
-    'Watching them play is a religious experience.',
-    'GOAT conversation is over. It\'s this person.',
-    'Carried by teammates. Take that away and what\'s left?',
-    'Pure talent. Generational athlete.',
-    'Clutch when it matters most. That\'s all I need.',
-    null
-  ],
-  youtube: [
-    'The production quality is insane.',
-    'Peak content. The algorithm blessed me.',
-    'Fell off hard after 2020. Not the same.',
-    'This channel genuinely taught me things.',
-    'I don\'t trust people who don\'t watch this.',
-    'Parasocial kings. Still watch every upload.',
-    'The editing alone deserves an award.',
-    null
-  ],
-  music: [
-    'This album changed my entire taste in music.',
-    'Overplayed. Good for like 3 songs.',
-    'Every track is a hit. No skips.',
-    'This is what peak music sounds like.',
-    'Dated fast. Doesn\'t hold up.',
-    'Still on repeat years later.',
-    'The lyricism on this is unmatched.',
-    'Carried hard by the production.',
-    null
-  ],
-  book: [
-    'Read it in one sitting. Life-changing.',
-    'Overrated classic. Couldn\'t finish it.',
-    'Every page has something worth underlining.',
-    'Required reading for literally anyone.',
-    'Changed the way I see the world.',
-    'Honestly kind of dry. People hype this too much.',
-    'The ending destroyed me.',
-    null
-  ],
-  game: [
-    'Spent 300 hours in this. Worth every second.',
-    'Finished it in a week. Immediately started again.',
-    'Genuinely one of the best games ever made.',
-    'Broken at launch. Still played 200 hours.',
-    'The world-building is unmatched.',
-    'Addictive in the best possible way.',
-    'Overrated by the community. It\'s fine.',
-    'The story made me emotional. In a game. Wild.',
-    null
-  ],
-  food: [
-    'Worth every penny and the wait.',
-    'Overpriced for what it is honestly.',
-    'I think about this meal weekly.',
-    'Best I\'ve ever had. No competition.',
-    'Hype is totally warranted.',
-    'Disappointing given the reputation.',
-    'Life-changing. My standards are ruined.',
-    null
-  ],
+  movie: {
+    positive: [
+      'Genuinely one of the best films ever made.',
+      'Watched it 5 times and it only gets better.',
+      'The cinematography alone deserves a 10.',
+      'Changed how I think about cinema.',
+      'Peak filmmaking. Nothing comes close.',
+      'I cried. I don\'t cry at movies. This is it.',
+      'Slept on it. Woke up. Still thinking about it.',
+    ],
+    neutral: [
+      'Good but not great. People oversell this.',
+      'Enjoyable but nothing I\'d rush to rewatch.',
+    ],
+    negative: [
+      'Overrated. I don\'t get the hype at all.',
+      'Pretty disappointing given all the praise.',
+    ],
+  },
+  tv: {
+    positive: [
+      'Best show I\'ve ever watched. Peak television.',
+      'Every episode leaves me wanting more.',
+      'The writing is on another level.',
+      'Binged the whole thing in a weekend. No regrets.',
+      'The characters are what make this special.',
+      'Cancelled too soon. I\'m still not over it.',
+    ],
+    neutral: [
+      'Started strong, fell off a bit as it went on.',
+      'Good, not the masterpiece people claim.',
+    ],
+    negative: [
+      'Overrated by the internet. It\'s just okay.',
+      'Started strong, fell off hard by season 3.',
+    ],
+  },
+  sport: {
+    positive: [
+      'The greatest to ever do it. Full stop.',
+      'Watching them play is a religious experience.',
+      'GOAT conversation is over. It\'s this person.',
+      'Pure talent. Generational athlete.',
+      'Clutch when it matters most. That\'s all I need.',
+    ],
+    neutral: [
+      'Has the talent but the consistency just isn\'t there.',
+      'Good but not elite. The hype is a bit much.',
+    ],
+    negative: [
+      'Overrated. Stats don\'t tell the whole story.',
+      'Carried by teammates. Take that away and what\'s left?',
+    ],
+  },
+  youtube: {
+    positive: [
+      'The production quality is insane.',
+      'Peak content. The algorithm blessed me.',
+      'This channel genuinely taught me things.',
+      'I don\'t trust people who don\'t watch this.',
+      'Parasocial kings. Still watch every upload.',
+      'The editing alone deserves an award.',
+    ],
+    neutral: [
+      'Decent but not must-watch. Background noise mostly.',
+      'Good channel but the recent stuff is hit or miss.',
+    ],
+    negative: [
+      'Fell off hard after 2020. Not the same.',
+      'Overhyped. The comments are more entertaining than the videos.',
+    ],
+  },
+  music: {
+    positive: [
+      'This album changed my entire taste in music.',
+      'Every track is a hit. No skips.',
+      'This is what peak music sounds like.',
+      'Still on repeat years later.',
+      'The lyricism on this is unmatched.',
+    ],
+    neutral: [
+      'Carried hard by the production.',
+      'A few great songs but uneven overall.',
+    ],
+    negative: [
+      'Overplayed. Good for like 3 songs.',
+      'Dated fast. Doesn\'t hold up.',
+    ],
+  },
+  book: {
+    positive: [
+      'Read it in one sitting. Life-changing.',
+      'Every page has something worth underlining.',
+      'Required reading for literally anyone.',
+      'Changed the way I see the world.',
+      'The ending destroyed me.',
+      'Couldn\'t put it down.',
+    ],
+    neutral: [
+      'Interesting ideas but the pacing drags.',
+      'Good book. Not the revelation people promised.',
+    ],
+    negative: [
+      'Overrated classic. Couldn\'t finish it.',
+      'Honestly kind of dry. People hype this too much.',
+    ],
+  },
+  game: {
+    positive: [
+      'Spent 300 hours in this. Worth every second.',
+      'Finished it in a week. Immediately started again.',
+      'Genuinely one of the best games ever made.',
+      'The world-building is unmatched.',
+      'Addictive in the best possible way.',
+      'The story made me emotional. In a game. Wild.',
+    ],
+    neutral: [
+      'Fun but not the masterpiece people claim.',
+      'Broken at launch. Still played 200 hours.',
+    ],
+    negative: [
+      'Overrated by the community. It\'s fine.',
+      'Fun for a few hours, then it completely lost me.',
+    ],
+  },
+  food: {
+    positive: [
+      'Worth every penny and the wait.',
+      'I think about this meal weekly.',
+      'Best I\'ve ever had. No competition.',
+      'Hype is totally warranted.',
+      'Life-changing. My standards are ruined.',
+    ],
+    neutral: [
+      'Pretty good but nothing I\'d go out of my way for.',
+      'Solid, nothing groundbreaking.',
+    ],
+    negative: [
+      'Overpriced for what it is honestly.',
+      'Disappointing given the reputation.',
+    ],
+  },
+}
+
+function pickReview(cat, score) {
+  const tiers = REVIEWS[cat]
+  if (!tiers) return null
+  const pool = score >= 7 ? tiers.positive : score <= 4 ? tiers.negative : tiers.neutral
+  const arr = [...pool, null]
+  return arr[Math.floor(Math.random() * arr.length)]
 }
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
@@ -277,14 +342,17 @@ async function run() {
 
       // Pick 4–9 random bots to rate this item
       const raters = shuffle(botIds).slice(0, 4 + Math.floor(Math.random() * 6))
-      const rows = raters.map(userId => ({
-        user_id: userId,
-        title: displayTitle,
-        category,
-        score: randScore(),
-        review: pick(REVIEWS[category]),
-        image_url: imageUrl,
-      }))
+      const rows = raters.map(userId => {
+        const score = randScore()
+        return {
+          user_id: userId,
+          title: displayTitle,
+          category,
+          score,
+          review: pickReview(category, score),
+          image_url: imageUrl,
+        }
+      })
 
       const { error } = await supabase.from('ratings').insert(rows)
       if (error) {

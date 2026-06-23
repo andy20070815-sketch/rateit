@@ -110,7 +110,7 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
           ) : r.image_url ? (
             <img src={r.image_url} alt={r.title} className="w-full rounded-xl object-cover max-h-96" />
           ) : (
-            <AutoImage title={r.title} category={r.category as Category} className="w-full max-h-72 h-56" ratingId={r.id} />
+            <AutoImage title={r.title} category={r.category as Category} className="w-full max-h-72 h-56 rounded-xl" ratingId={r.id} />
           )}
 
           {/* Category */}

@@ -63,12 +63,12 @@ export default function OnboardingPage() {
         {/* Continue button */}
         <button
           onClick={handleContinue}
-          disabled={selected.length < 1}
+          disabled={selected.length < 3}
           className="w-full py-3.5 rounded-2xl font-semibold text-sm bg-black dark:bg-white text-white dark:text-black disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
         >
-          {selected.length === 0
-            ? 'Select at least one category'
-            : `Continue with ${selected.length} categor${selected.length === 1 ? 'y' : 'ies'}`}
+          {selected.length < 3
+            ? 'Select at least 3 categories'
+            : `Continue with ${selected.length} categories`}
         </button>
 
         {/* Skip */}

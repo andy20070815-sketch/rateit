@@ -119,7 +119,7 @@ export default function FeedContent({ currentUserId }: Props) {
       {/* Header */}
       <div className="sticky top-14 md:top-0 z-40 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-900 -mx-4 px-4 py-2">
         <div className="flex items-center gap-2">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5 flex-1">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5 flex-1 min-w-0" style={{ maskImage: 'linear-gradient(to right, black calc(100% - 2rem), transparent)', WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 2rem), transparent)' }}>
             <button
               onClick={() => setActiveCategory('all')}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${

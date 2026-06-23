@@ -25,7 +25,7 @@ export default function ExternalScores({ title, category }: { title: string; cat
       {data.scores.map((s) => (
         <span
           key={s.source}
-          className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg font-medium"
+          className="text-xs px-2 py-1 rounded-lg font-medium border border-[var(--line)] text-[var(--muted)]"
         >
           {s.source}: {s.value}
         </span>

@@ -35,13 +35,14 @@ export default function AutoImage({ title, category, className = '', ratingId }:
   }, [title, category, ratingId])
 
   if (!tried) {
-    return <div className={`bg-zinc-100 dark:bg-zinc-800 animate-pulse rounded-xl ${className}`} />
+    return <div className={`bg-[var(--surface)] animate-pulse ${className}`} />
   }
 
   if (!url) {
     return (
-      <div className={`flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 rounded-xl ${className}`}>
-        <CategoryIcon category={category} size={32} className="text-zinc-400" strokeWidth={1.5} />
+      <div className={`flex flex-col items-center justify-center gap-3 bg-[var(--surface)] ${className}`}>
+        <CategoryIcon category={category} size={28} className="text-[var(--faint)]" strokeWidth={1.5} />
+        <span className="text-xs font-bold tracking-tight text-[var(--faint)]">rateit</span>
       </div>
     )
   }
@@ -50,7 +51,7 @@ export default function AutoImage({ title, category, className = '', ratingId }:
     <img
       src={url}
       alt={title}
-      className={`object-cover rounded-xl ${className}`}
+      className={`object-cover ${className}`}
       onError={() => setUrl(null)}
     />
   )
