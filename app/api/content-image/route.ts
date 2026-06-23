@@ -20,6 +20,10 @@ async function getWikipediaImage(title: string): Promise<string | null> {
   }
 }
 
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title')
@@ -39,7 +43,7 @@ export async function GET(request: NextRequest) {
       )
       const data = await res.json()
       const url = data.Poster && data.Poster !== 'N/A' ? data.Poster : null
-      return NextResponse.json({ url })
+      return NextResponse.json({ url }, { headers: CACHE_HEADERS })
     }
 
     // Music, books, games — iTunes artwork with word-match validation
@@ -58,12 +62,12 @@ export async function GET(request: NextRequest) {
       const isMatch = queryWords.length === 0 || matchCount / queryWords.length >= 0.5
 
       const url = (item && isMatch) ? (item.artworkUrl100?.replace('100x100', '400x400') ?? null) : null
-      return NextResponse.json({ url })
+      return NextResponse.json({ url }, { headers: CACHE_HEADERS })
     }
 
     // Sport, YouTube, food, other — Wikipedia image
     const url = await getWikipediaImage(title)
-    return NextResponse.json({ url })
+    return NextResponse.json({ url }, { headers: CACHE_HEADERS })
 
   } catch {
     return NextResponse.json({ url: null })

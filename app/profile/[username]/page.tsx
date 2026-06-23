@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import type { Metadata } from 'next'
-import { createClient } from '../../../lib/supabase/server'
+import { createClient, createPublicClient } from '../../../lib/supabase/server'
 import Navbar from '../../../components/Navbar'
 import FollowButton from '../../../components/FollowButton'
 import ProfileGrid from '../../../components/ProfileGrid'
@@ -11,25 +12,56 @@ interface Props {
   params: Promise<{ username: string }>
 }
 
+// Cached for 60 s — shared between generateMetadata and the page render
+const getProfilePublicData = unstable_cache(
+  async (username: string) => {
+    const supabase = createPublicClient()
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', username)
+      .single()
+
+    if (!profile) return null
+
+    const [{ data: ratings }, { count: followerCount }, { count: followingCount }] =
+      await Promise.all([
+        supabase
+          .from('ratings')
+          .select('*, profiles(id, username, avatar_url)')
+          .eq('user_id', profile.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('following_id', profile.id),
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('follower_id', profile.id),
+      ])
+
+    return {
+      profile,
+      ratings: (ratings ?? []) as Rating[],
+      followerCount: followerCount ?? 0,
+      followingCount: followingCount ?? 0,
+    }
+  },
+  ['profile-public-data'],
+  { revalidate: 60 }
+)
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
-  const supabase = await createClient()
+  const data = await getProfilePublicData(username)
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, username, full_name, avatar_url')
-    .eq('username', username)
-    .single()
+  if (!data) return { title: 'Profile not found' }
 
-  if (!profile) return { title: 'Profile not found' }
-
-  const { count } = await supabase
-    .from('ratings')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', profile.id)
-
+  const { profile, ratings } = data
   const name = profile.full_name || profile.username
-  const desc = `${count ?? 0} ratings on rateit`
+  const desc = `${ratings.length} ratings on rateit`
 
   return {
     title: `${name} (@${profile.username})`,
@@ -50,11 +82,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProfilePage({ params }: Props) {
   const { username } = await params
-  const supabase = await createClient()
 
+  // Auth-dependent (reads cookies — not cached)
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch current viewer's profile only if logged in
   let currentProfile = null
   if (user) {
     const { data: p } = await supabase
@@ -65,35 +97,13 @@ export default async function ProfilePage({ params }: Props) {
     currentProfile = p
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('username', username)
-    .single()
+  // Cached public data
+  const publicData = await getProfilePublicData(username)
+  if (!publicData) notFound()
 
-  if (!profile) notFound()
+  const { profile, ratings, followerCount, followingCount } = publicData
 
-  // Base queries always run
-  const baseQueries = [
-    supabase
-      .from('ratings')
-      .select('*, profiles(id, username, avatar_url)')
-      .eq('user_id', profile.id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('following_id', profile.id),
-    supabase
-      .from('follows')
-      .select('*', { count: 'exact', head: true })
-      .eq('follower_id', profile.id),
-  ] as const
-
-  // Follow status only needed when viewer is logged in
-  const [{ data: ratings }, { count: followerCount }, { count: followingCount }] =
-    await Promise.all(baseQueries)
-
+  // Viewer-specific follow check (not cached)
   let isFollowing = false
   if (user) {
     const { data: isFollowingData } = await supabase
@@ -126,15 +136,15 @@ export default async function ProfilePage({ params }: Props) {
             {/* Stats */}
             <div className="flex gap-5 flex-1 justify-around">
               <div className="text-center">
-                <p className="font-black text-xl leading-tight">{ratings?.length ?? 0}</p>
+                <p className="font-black text-xl leading-tight">{ratings.length}</p>
                 <p className="text-xs text-zinc-500">Ratings</p>
               </div>
-              <Link href={`/profile/${username}/followers`} className="text-center hover:opacity-70 transition-opacity">
-                <p className="font-black text-xl leading-tight">{followerCount ?? 0}</p>
+              <Link href={`/profile/${username}/followers`} prefetch={false} className="text-center hover:opacity-70 transition-opacity">
+                <p className="font-black text-xl leading-tight">{followerCount}</p>
                 <p className="text-xs text-zinc-500">Followers</p>
               </Link>
-              <Link href={`/profile/${username}/following`} className="text-center hover:opacity-70 transition-opacity">
-                <p className="font-black text-xl leading-tight">{followingCount ?? 0}</p>
+              <Link href={`/profile/${username}/following`} prefetch={false} className="text-center hover:opacity-70 transition-opacity">
+                <p className="font-black text-xl leading-tight">{followingCount}</p>
                 <p className="text-xs text-zinc-500">Following</p>
               </Link>
             </div>
@@ -177,7 +187,7 @@ export default async function ProfilePage({ params }: Props) {
         <div className="border-t border-zinc-100 dark:border-zinc-800" />
 
         {/* Ratings grid — no padding, edge-to-edge */}
-        <ProfileGrid ratings={(ratings ?? []) as Rating[]} />
+        <ProfileGrid ratings={ratings} />
 
       </main>
     </>

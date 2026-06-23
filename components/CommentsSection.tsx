@@ -84,10 +84,10 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
         <div className="space-y-2.5">
           {comments.map(c => (
             <div key={c.id} className="flex items-start gap-2 group">
-              <Link href={`/profile/${c.profiles.username}`}>
+              <Link href={`/profile/${c.profiles.username}`} prefetch={false}>
                 <div className="w-6 h-6 rounded-full bg-[var(--surface)] flex-shrink-0 overflow-hidden">
                   {c.profiles.avatar_url ? (
-                    <img src={c.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                    <img src={c.profiles.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--muted)]">
                       {c.profiles.username[0].toUpperCase()}
@@ -97,7 +97,7 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
               </Link>
               <div className="flex-1 min-w-0">
                 <p className="text-xs leading-relaxed">
-                  <Link href={`/profile/${c.profiles.username}`} className="font-semibold hover:underline mr-1">
+                  <Link href={`/profile/${c.profiles.username}`} prefetch={false} className="font-semibold hover:underline mr-1">
                     {c.profiles.username}
                   </Link>
                   <span className="text-[var(--muted)]">{c.content}</span>

@@ -62,6 +62,7 @@ export default function FeedContent({ currentUserId }: Props) {
   const router = useRouter()
   const [feed, setFeed] = useState<Rating[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all')
   const tCat = useTranslations('categories')
   const tFeed = useTranslations('feed')
@@ -73,8 +74,12 @@ export default function FeedContent({ currentUserId }: Props) {
     }
   }, [currentUserId, router])
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true)
+    } else {
+      setLoading(true)
+    }
     const supabase = createClient()
 
     // Get IDs of people I follow so we can exclude them
@@ -88,6 +93,7 @@ export default function FeedContent({ currentUserId }: Props) {
     }
 
     // Fetch per-category in parallel so every category is always represented
+    // 20 rows per category is enough — buildDiverseFeed keeps at most 8 per preferred category
     const excludeIds = [...followedIds, currentUserId].filter(Boolean) as string[]
 
     const categoryQueries = CATEGORIES.map(cat => {
@@ -96,7 +102,7 @@ export default function FeedContent({ currentUserId }: Props) {
         .select('*, profiles(id, username, avatar_url)')
         .eq('category', cat)
         .order('created_at', { ascending: false })
-        .limit(40)
+        .limit(20)
       if (excludeIds.length > 0) {
         q = q.not('user_id', 'in', `(${excludeIds.join(',')})`)
       }
@@ -109,6 +115,7 @@ export default function FeedContent({ currentUserId }: Props) {
 
     setFeed(buildDiverseFeed(pool, preferred))
     setLoading(false)
+    setRefreshing(false)
   }, [currentUserId])
 
   useEffect(() => { load() }, [load])
@@ -150,12 +157,12 @@ export default function FeedContent({ currentUserId }: Props) {
 
           {/* Refresh button */}
           <button
-            onClick={load}
-            disabled={loading}
+            onClick={() => load(true)}
+            disabled={loading || refreshing}
             className="flex-shrink-0 p-1.5 rounded-full text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-30"
             title="Refresh feed"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
@@ -163,6 +170,7 @@ export default function FeedContent({ currentUserId }: Props) {
       {/* Feed — 1 column on mobile, 2 columns on desktop */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         {loading ? (
+          // Skeleton only on first load — refresh keeps existing cards visible
           <>
             {[...Array(6)].map((_, i) => (
               <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">

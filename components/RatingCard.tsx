@@ -41,10 +41,10 @@ export default function RatingCard({ rating, showUser = true }: Props) {
     <div className="bg-[var(--paper)] rounded-2xl border border-[var(--line)] overflow-hidden">
       {/* Author */}
       {showUser && rating.profiles && (
-        <Link href={`/profile/${rating.profiles.username}`} className="flex items-center gap-2.5 px-4 pt-4">
+        <Link href={`/profile/${rating.profiles.username}`} prefetch={false} className="flex items-center gap-2.5 px-4 pt-4">
           <div className="w-7 h-7 rounded-full bg-[var(--surface)] overflow-hidden flex items-center justify-center text-xs font-bold flex-shrink-0">
             {rating.profiles.avatar_url ? (
-              <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" />
+              <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" loading="lazy" />
             ) : (
               rating.profiles.username[0].toUpperCase()
             )}
@@ -59,16 +59,17 @@ export default function RatingCard({ rating, showUser = true }: Props) {
         {rating.image_url && isVideoUrl(rating.image_url) ? (
           <video src={rating.image_url} className="w-full h-full object-cover" controls playsInline muted loop />
         ) : (rating.image_url && !imgFailed) ? (
-          <Link href={contentHref} className="block w-full h-full">
+          <Link href={contentHref} prefetch={false} className="block w-full h-full">
             <img
               src={rating.image_url}
               alt={rating.title}
               className="w-full h-full object-cover"
+              loading="lazy"
               onError={() => setImgFailed(true)}
             />
           </Link>
         ) : (
-          <Link href={contentHref} className="block w-full h-full">
+          <Link href={contentHref} prefetch={false} className="block w-full h-full">
             <AutoImage title={rating.title} category={rating.category} className="w-full h-full" ratingId={rating.id} />
           </Link>
         )}
@@ -85,7 +86,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
         </div>
 
         {/* Title */}
-        <Link href={contentHref} className="block text-[15px] font-semibold text-[var(--ink)] hover:opacity-70 transition-opacity leading-snug">
+        <Link href={contentHref} prefetch={false} className="block text-[15px] font-semibold text-[var(--ink)] hover:opacity-70 transition-opacity leading-snug">
           {rating.title}
         </Link>
 

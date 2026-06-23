@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import type { Metadata } from 'next'
-import { createClient } from '../../../../lib/supabase/server'
+import { createClient, createPublicClient } from '../../../../lib/supabase/server'
 import Navbar from '../../../../components/Navbar'
 import AutoImage from '../../../../components/AutoImage'
 import ExternalScores from '../../../../components/ExternalScores'
@@ -16,19 +17,29 @@ interface Props {
   params: Promise<{ category: string; title: string }>
 }
 
+// Cached for 60 s — shared between generateMetadata and the page render
+const getContentRatings = unstable_cache(
+  async (title: string, category: string) => {
+    const supabase = createPublicClient()
+    const { data } = await supabase
+      .from('ratings')
+      .select('*, profiles(id, username, avatar_url)')
+      .eq('title', title)
+      .eq('category', category)
+      .order('created_at', { ascending: false })
+    return data ?? []
+  },
+  ['content-ratings'],
+  { revalidate: 60 }
+)
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category: rawCategory, title: encodedTitle } = await params
   const title = decodeURIComponent(encodedTitle)
   const category = rawCategory as Category
 
-  const supabase = await createClient()
-  const { data: ratings } = await supabase
-    .from('ratings')
-    .select('score, image_url')
-    .eq('title', title)
-    .eq('category', category)
-
-  if (!ratings || ratings.length === 0) return { title }
+  const ratings = await getContentRatings(title, category)
+  if (ratings.length === 0) return { title }
 
   const avg = Math.round((ratings.reduce((s, r) => s + r.score, 0) / ratings.length) * 10) / 10
   const image = ratings.find(r => r.image_url)?.image_url
@@ -59,8 +70,8 @@ export default async function ContentPage({ params }: Props) {
 
   if (!CATEGORIES.includes(category)) notFound()
 
+  // Auth-dependent parts (not cached — reads cookies)
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
 
   let profile = null
@@ -69,14 +80,9 @@ export default async function ContentPage({ params }: Props) {
     profile = p
   }
 
-  const { data: ratings } = await supabase
-    .from('ratings')
-    .select('*, profiles(id, username, avatar_url)')
-    .eq('title', title)
-    .eq('category', category)
-    .order('created_at', { ascending: false })
-
-  if (!ratings || ratings.length === 0) notFound()
+  // Cached data — shared with generateMetadata, no extra DB hit on navigation
+  const ratings = await getContentRatings(title, category)
+  if (ratings.length === 0) notFound()
 
   const avg = ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length
   const avgRounded = Math.round(avg * 10) / 10
@@ -86,7 +92,6 @@ export default async function ContentPage({ params }: Props) {
     avg >= 5 ? 'text-yellow-500' :
     'text-red-500'
 
-  // Score distribution
   const dist = Array.from({ length: 10 }, (_, i) => ({
     score: i + 1,
     count: ratings.filter((r) => r.score === i + 1).length,
@@ -174,10 +179,10 @@ export default async function ContentPage({ params }: Props) {
               {/* User row */}
               <div className="flex items-center justify-between">
                 {rating.profiles && (
-                  <Link href={`/profile/${rating.profiles.username}`} className="flex items-center gap-2">
+                  <Link href={`/profile/${rating.profiles.username}`} prefetch={false} className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold overflow-hidden">
                       {rating.profiles.avatar_url ? (
-                        <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" />
+                        <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         rating.profiles.username[0].toUpperCase()
                       )}
@@ -213,6 +218,7 @@ export default async function ContentPage({ params }: Props) {
                     src={rating.image_url}
                     alt=""
                     className="w-full rounded-xl object-cover max-h-72"
+                    loading="lazy"
                   />
                 )
               )}

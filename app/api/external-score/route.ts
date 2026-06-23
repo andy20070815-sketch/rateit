@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title')
@@ -15,7 +19,7 @@ export async function GET(request: NextRequest) {
     )
     const data = await res.json()
 
-    if (data.Response === 'False') return NextResponse.json(null)
+    if (data.Response === 'False') return NextResponse.json(null, { headers: CACHE_HEADERS })
 
     const scores: { source: string; value: string }[] = []
 
@@ -38,7 +42,7 @@ export async function GET(request: NextRequest) {
       runtime: data.Runtime !== 'N/A' ? data.Runtime : null,
       awards: data.Awards !== 'N/A' ? data.Awards : null,
       rated: data.Rated !== 'N/A' ? data.Rated : null,
-    })
+    }, { headers: CACHE_HEADERS })
   } catch {
     return NextResponse.json(null)
   }

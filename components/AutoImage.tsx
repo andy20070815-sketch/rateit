@@ -52,6 +52,7 @@ export default function AutoImage({ title, category, className = '', ratingId }:
       src={url}
       alt={title}
       className={`object-cover ${className}`}
+      loading="lazy"
       onError={() => setUrl(null)}
     />
   )
