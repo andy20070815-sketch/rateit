@@ -50,9 +50,8 @@ export default function ProfileGrid({ ratings }: { ratings: Rating[] }) {
             <span className="text-[9px] text-white/60 leading-none">/10</span>
           </div>
 
-          {/* Share button — bottom-left, above the link.
-              Always visible on mobile (no hover); appears on hover on desktop. */}
-          <div className="absolute bottom-1.5 left-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          {/* Share button — bottom-left, above the link. Always visible. */}
+          <div className="absolute bottom-1.5 left-1.5 z-10">
             <ShareButton
               rating={{ id: r.id, title: r.title, score: r.score }}
               iconOnly

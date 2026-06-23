@@ -95,7 +95,7 @@ export default async function RatingPermalinkPage({ params, searchParams }: Prop
 
           {/* Author */}
           {r.profiles && (
-            <Link href={`/profile/${username}`} className="flex items-center gap-2">
+            <Link href={`/profile/${username}`} prefetch={false} className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center text-sm font-bold">
                 {r.profiles.avatar_url ? (
                   <img src={r.profiles.avatar_url} alt={username} className="w-full h-full object-cover" />
