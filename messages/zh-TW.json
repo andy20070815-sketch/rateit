@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "home": "首頁",
+    "search": "搜尋",
+    "explore": "探索",
+    "profile": "個人檔案",
+    "settings": "設定",
+    "rate": "來評分"
+  },
+  "categories": {
+    "all": "全部",
+    "movie": "電影",
+    "tv": "影集",
+    "sport": "運動",
+    "youtube": "YouTube",
+    "music": "音樂",
+    "book": "書籍",
+    "game": "遊戲",
+    "food": "美食",
+    "person": "人物",
+    "other": "其他"
+  },
+  "onboarding": {
+    "title": "你喜歡什麼？",
+    "pickAtLeast": "選擇至少 3 個分類，打造你的專屬動態。",
+    "pickMore": "還需再選 {remaining} 個分類。",
+    "ready": "你的動態已經準備好了。",
+    "continue": "繼續（已選 {count} 個分類）",
+    "selectAtLeast": "請至少選擇 3 個分類",
+    "skip": "暫時略過"
+  },
+  "feed": {
+    "noRatings": "還沒有評分",
+    "noRatingsCategory": "還沒有 {category} 的評分"
+  },
+  "comments": {
+    "placeholder": "新增留言…",
+    "post": "發布",
+    "empty": "還沒有留言，搶頭香！",
+    "loading": "載入留言中…",
+    "signIn": "登入",
+    "signInTo": "才能留言",
+    "hide": "隱藏",
+    "label": "留言",
+    "count": "{count} 則留言"
+  },
+  "share": {
+    "title": "分享這則評分",
+    "copyLink": "複製連結",
+    "copied": "已複製！",
+    "downloadImage": "下載圖片",
+    "card": "卡片 (1200×630)",
+    "story": "限時動態 (1080×1920)",
+    "downloading": "下載中…",
+    "shareTo": "分享至",
+    "instagram": "Instagram",
+    "downloadStory": "下載限時動態圖片",
+    "storyHint": "圖片已儲存，請開啟 Instagram 發布",
+    "rateYourself": "自己也來評分"
+  },
+  "auth": {
+    "signIn": "登入",
+    "signUp": "註冊",
+    "signOut": "登出",
+    "joinCTA": "加入即可評分、追蹤他人",
+    "joinFree": "免費，只要 10 秒"
+  },
+  "account": {
+    "ratings": "評分",
+    "followers": "粉絲",
+    "following": "追蹤中",
+    "bio": "自我介紹",
+    "sectionAccount": "帳號",
+    "username": "用戶名稱",
+    "email": "電子郵件",
+    "memberSince": "加入時間",
+    "sectionActivity": "活動",
+    "myRatings": "我的評分",
+    "rateNew": "評分新項目",
+    "languageLabel": "Language / 語言",
+    "deleteAccount": "刪除帳號"
+  },
+  "footer": {
+    "privacy": "隱私權政策",
+    "terms": "服務條款",
+    "contact": "聯絡我們"
+  },
+  "time": {
+    "justNow": "剛才",
+    "minsAgo": "{n} 分鐘前",
+    "hoursAgo": "{n} 小時前",
+    "daysAgo": "{n} 天前",
+    "weeksAgo": "{n} 週前"
+  },
+  "search": {
+    "placeholder": "搜尋任何內容…",
+    "rate": "評分"
+  },
+  "explore": {
+    "title": "探索",
+    "topRated": "評分最高",
+    "trending": "熱門"
+  },
+  "rate": {
+    "title": "評分",
+    "itemName": "你要評什麼？",
+    "score": "分數",
+    "review": "評論（選填）",
+    "submit": "發布評分",
+    "submitting": "發布中…"
+  }
+}

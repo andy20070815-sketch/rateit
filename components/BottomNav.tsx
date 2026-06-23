@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Home, Search, PlusCircle, Compass, User } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
 
@@ -11,6 +12,7 @@ const HIDE_ON = ['/login', '/signup', '/onboarding', '/stories/new', '/auth/call
 export default function BottomNav() {
   const pathname = usePathname()
   const [username, setUsername] = useState<string | null>(null)
+  const t = useTranslations('nav')
 
   useEffect(() => {
     const supabase = createClient()
@@ -26,11 +28,11 @@ export default function BottomNav() {
   const profileHref = username ? `/profile/${username}` : '/login'
 
   const tabs = [
-    { href: '/feed',      icon: Home,       label: 'Home'    },
-    { href: '/search',    icon: Search,     label: 'Search'  },
-    { href: '/rate',      icon: PlusCircle, label: 'Rate',   special: true },
-    { href: '/explore',   icon: Compass,    label: 'Explore' },
-    { href: profileHref,  icon: User,       label: 'Profile' },
+    { href: '/feed',     icon: Home,       label: t('home'),    special: false },
+    { href: '/search',   icon: Search,     label: t('search'),  special: false },
+    { href: '/rate',     icon: PlusCircle, label: t('rate'),    special: true  },
+    { href: '/explore',  icon: Compass,    label: t('explore'), special: false },
+    { href: profileHref, icon: User,       label: t('profile'), special: false },
   ]
 
   return (
@@ -42,7 +44,7 @@ export default function BottomNav() {
         const isActive = pathname === href || (href !== '/feed' && !special && pathname.startsWith(href))
         return (
           <Link
-            key={label}
+            key={href}
             href={href}
             className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2.5 transition-colors ${
               special

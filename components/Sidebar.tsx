@@ -3,12 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Home, Search, PlusCircle, Compass, User, Settings } from 'lucide-react'
 import { createClient } from '../lib/supabase/client'
 
 export default function Sidebar() {
   const pathname = usePathname()
   const [username, setUsername] = useState<string | null>(null)
+  const t = useTranslations('nav')
 
   useEffect(() => {
     const supabase = createClient()
@@ -20,10 +22,10 @@ export default function Sidebar() {
   }, [])
 
   const navItems = [
-    { href: '/feed',    icon: Home,    label: 'Home'    },
-    { href: '/search',  icon: Search,  label: 'Search'  },
-    { href: '/explore', icon: Compass, label: 'Explore' },
-    { href: username ? `/profile/${username}` : '/login', icon: User, label: 'Profile' },
+    { href: '/feed',    icon: Home,    label: t('home')    },
+    { href: '/search',  icon: Search,  label: t('search')  },
+    { href: '/explore', icon: Compass, label: t('explore') },
+    { href: username ? `/profile/${username}` : '/login', icon: User, label: t('profile') },
   ]
 
   return (
@@ -39,7 +41,7 @@ export default function Sidebar() {
           const isActive = pathname === href || (href !== '/feed' && pathname.startsWith(href))
           return (
             <Link
-              key={label}
+              key={href}
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors font-medium text-[15px] ${
                 isActive
@@ -63,7 +65,7 @@ export default function Sidebar() {
           }`}
         >
           <PlusCircle size={20} />
-          Rate something
+          {t('rate')}
         </Link>
       </nav>
 
@@ -73,7 +75,7 @@ export default function Sidebar() {
         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 dark:text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-black dark:hover:text-white transition-colors text-sm font-medium"
       >
         <Settings size={19} strokeWidth={1.75} />
-        Settings
+        {t('settings')}
       </Link>
     </aside>
   )

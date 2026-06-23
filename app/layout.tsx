@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import "./globals.css";
 import BottomNav from "../components/BottomNav";
 import Sidebar from "../components/Sidebar";
@@ -40,30 +42,35 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* Desktop sidebar — hidden on mobile */}
-        <Sidebar />
-        {/* Content shifts right on desktop to clear sidebar; bottom padding on mobile for bottom nav */}
-        <div className="flex-1 md:ml-60 pb-16 md:pb-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0px)' }}>
-          {children}
-          <footer className="max-w-lg md:max-w-2xl mx-auto px-4 py-6 flex justify-center gap-6 text-xs text-zinc-400">
-            <a href="/privacy" className="hover:text-zinc-600 transition-colors">Privacy Policy</a>
-            <a href="/terms" className="hover:text-zinc-600 transition-colors">Terms of Service</a>
-            <a href="mailto:RateitAsk@gmail.com" className="hover:text-zinc-600 transition-colors">Contact</a>
-          </footer>
-        </div>
-        {/* Bottom nav — hidden on desktop */}
-        <BottomNav />
+        <NextIntlClientProvider messages={messages}>
+          {/* Desktop sidebar — hidden on mobile */}
+          <Sidebar />
+          {/* Content shifts right on desktop to clear sidebar; bottom padding on mobile for bottom nav */}
+          <div className="flex-1 md:ml-60 pb-16 md:pb-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0px)' }}>
+            {children}
+            <footer className="max-w-lg md:max-w-2xl mx-auto px-4 py-6 flex justify-center gap-6 text-xs text-zinc-400">
+              <a href="/privacy" className="hover:text-zinc-600 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-zinc-600 transition-colors">Terms of Service</a>
+              <a href="mailto:RateitAsk@gmail.com" className="hover:text-zinc-600 transition-colors">Contact</a>
+            </footer>
+          </div>
+          {/* Bottom nav — hidden on desktop */}
+          <BottomNav />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

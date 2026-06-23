@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { createClient } from '../../lib/supabase/server'
 import Navbar from '../../components/Navbar'
 import SignOutButton from '../../components/SignOutButton'
 import DeleteAccountButton from '../../components/DeleteAccountButton'
+import LocaleSwitch from '../../components/LocaleSwitch'
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -26,10 +28,13 @@ export default async function AccountPage() {
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
   ])
 
-  const memberSince = new Date(user.created_at).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  })
+  const t = await getTranslations('account')
+  const locale = await getLocale()
+
+  const memberSince = new Date(user.created_at).toLocaleDateString(
+    locale === 'zh-TW' ? 'zh-TW' : 'en-US',
+    { month: 'long', year: 'numeric' }
+  )
 
   return (
     <>
@@ -57,41 +62,46 @@ export default async function AccountPage() {
         <div className="flex justify-center gap-10 py-4 border-y border-zinc-100 dark:border-zinc-800">
           <div className="text-center">
             <p className="text-2xl font-black">{ratingsCount ?? 0}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">Ratings</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{t('ratings')}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-black">{followersCount ?? 0}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">Followers</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{t('followers')}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-black">{followingCount ?? 0}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">Following</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{t('following')}</p>
           </div>
         </div>
 
         {/* Bio */}
         {profile?.bio && (
           <div className="space-y-1">
-            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Bio</p>
+            <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{t('bio')}</p>
             <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{profile.bio}</p>
           </div>
         )}
 
+        {/* Language */}
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{t('languageLabel')}</p>
+          <LocaleSwitch />
+        </div>
+
         {/* Account info */}
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Account</p>
-
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{t('sectionAccount')}</p>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl divide-y divide-zinc-100 dark:divide-zinc-800">
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-zinc-500">Username</span>
+              <span className="text-sm text-zinc-500">{t('username')}</span>
               <span className="text-sm font-semibold">@{profile?.username}</span>
             </div>
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-zinc-500">Email</span>
+              <span className="text-sm text-zinc-500">{t('email')}</span>
               <span className="text-sm font-semibold">{user.email}</span>
             </div>
             <div className="flex items-center justify-between px-4 py-3.5">
-              <span className="text-sm text-zinc-500">Member since</span>
+              <span className="text-sm text-zinc-500">{t('memberSince')}</span>
               <span className="text-sm font-semibold">{memberSince}</span>
             </div>
           </div>
@@ -99,14 +109,14 @@ export default async function AccountPage() {
 
         {/* Quick links */}
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Activity</p>
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{t('sectionActivity')}</p>
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl divide-y divide-zinc-100 dark:divide-zinc-800">
             <Link href={`/profile/${profile?.username}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors rounded-t-2xl">
-              <span className="text-sm font-medium">My ratings</span>
+              <span className="text-sm font-medium">{t('myRatings')}</span>
               <span className="text-zinc-400 text-sm">›</span>
             </Link>
             <Link href="/rate" className="flex items-center justify-between px-4 py-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors rounded-b-2xl">
-              <span className="text-sm font-medium">Rate something new</span>
+              <span className="text-sm font-medium">{t('rateNew')}</span>
               <span className="text-zinc-400 text-sm">›</span>
             </Link>
           </div>

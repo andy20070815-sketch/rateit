@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "explore": "Explore",
+    "profile": "Profile",
+    "settings": "Settings",
+    "rate": "Rate something"
+  },
+  "categories": {
+    "all": "All",
+    "movie": "Movie",
+    "tv": "TV Show",
+    "sport": "Sport",
+    "youtube": "YouTube",
+    "music": "Music",
+    "book": "Book",
+    "game": "Game",
+    "food": "Food",
+    "person": "Person",
+    "other": "Other"
+  },
+  "onboarding": {
+    "title": "What do you love?",
+    "pickAtLeast": "Pick at least 3 categories to personalize your feed.",
+    "pickMore": "Pick {remaining} more to personalize your feed.",
+    "ready": "Your feed is ready to go.",
+    "continue": "Continue with {count} categories",
+    "selectAtLeast": "Select at least 3 categories",
+    "skip": "Skip for now"
+  },
+  "feed": {
+    "noRatings": "No ratings yet",
+    "noRatingsCategory": "No {category} ratings yet"
+  },
+  "comments": {
+    "placeholder": "Add a comment…",
+    "post": "Post",
+    "empty": "No comments yet. Be first!",
+    "loading": "Loading comments…",
+    "signIn": "Sign in",
+    "signInTo": "to comment",
+    "hide": "Hide",
+    "label": "Comments",
+    "count": "{count, plural, one {# comment} other {# comments}}"
+  },
+  "share": {
+    "title": "Share this rating",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "downloadImage": "Download image",
+    "card": "Card (1200×630)",
+    "story": "Story (1080×1920)",
+    "downloading": "Downloading…",
+    "shareTo": "Share to",
+    "instagram": "Instagram",
+    "downloadStory": "Download story image",
+    "storyHint": "Story image saved — open Instagram and post it",
+    "rateYourself": "Rate it yourself — free, 10 seconds"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "joinCTA": "Join to rate & follow people",
+    "joinFree": "Free — takes 10 seconds"
+  },
+  "account": {
+    "ratings": "Ratings",
+    "followers": "Followers",
+    "following": "Following",
+    "bio": "Bio",
+    "sectionAccount": "Account",
+    "username": "Username",
+    "email": "Email",
+    "memberSince": "Member since",
+    "sectionActivity": "Activity",
+    "myRatings": "My ratings",
+    "rateNew": "Rate something new",
+    "languageLabel": "Language / 語言",
+    "deleteAccount": "Delete account"
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact"
+  },
+  "time": {
+    "justNow": "just now",
+    "minsAgo": "{n}m ago",
+    "hoursAgo": "{n}h ago",
+    "daysAgo": "{n}d ago",
+    "weeksAgo": "{n}w ago"
+  },
+  "search": {
+    "placeholder": "Search anything…",
+    "rate": "Rate"
+  },
+  "explore": {
+    "title": "Explore",
+    "topRated": "Top rated",
+    "trending": "Trending"
+  },
+  "rate": {
+    "title": "Rate something",
+    "itemName": "What are you rating?",
+    "score": "Score",
+    "review": "Review (optional)",
+    "submit": "Post rating",
+    "submitting": "Posting…"
+  }
+}
