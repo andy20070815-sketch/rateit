@@ -79,7 +79,9 @@
     "myRatings": "我的評分",
     "rateNew": "評分新項目",
     "languageLabel": "Language / 語言",
-    "deleteAccount": "刪除帳號"
+    "deleteAccount": "刪除帳號",
+    "editPhoto": "更換大頭貼",
+    "uploading": "上傳中…"
   },
   "footer": {
     "privacy": "隱私權政策",

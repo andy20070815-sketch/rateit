@@ -6,6 +6,7 @@ import Navbar from '../../components/Navbar'
 import SignOutButton from '../../components/SignOutButton'
 import DeleteAccountButton from '../../components/DeleteAccountButton'
 import LocaleSwitch from '../../components/LocaleSwitch'
+import AvatarUpload from '../../components/AvatarUpload'
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -43,13 +44,10 @@ export default async function AccountPage() {
 
         {/* Avatar + name */}
         <div className="flex flex-col items-center gap-3 pt-4">
-          <div className="w-24 h-24 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-4xl font-black overflow-hidden">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
-            ) : (
-              profile?.username?.[0]?.toUpperCase() ?? '?'
-            )}
-          </div>
+          <AvatarUpload
+            currentUrl={profile?.avatar_url ?? null}
+            username={profile?.username ?? '?'}
+          />
           <div className="text-center">
             <p className="text-2xl font-black">@{profile?.username}</p>
             {profile?.full_name && (

@@ -79,7 +79,9 @@
     "myRatings": "My ratings",
     "rateNew": "Rate something new",
     "languageLabel": "Language / 語言",
-    "deleteAccount": "Delete account"
+    "deleteAccount": "Delete account",
+    "editPhoto": "Edit photo",
+    "uploading": "Uploading…"
   },
   "footer": {
     "privacy": "Privacy Policy",
