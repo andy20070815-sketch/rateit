@@ -132,58 +132,50 @@ async function buildCanvas(
 
   let y = cy + pad
 
-  // ── Score row ──────────────────────────────────────────────────────────────
-  // Draw the big score number first, measure it BEFORE switching fonts,
-  // then draw "/10" at the same baseline offset to the right.
+  // ── Score on its own line (no side-by-side measurement needed) ─────────────
   const sc = scoreColor(rating.score)
-  const scoreSize = format === 'og' ? 96 : 120
-  const slashSize = format === 'og' ? 32 : 40
-
+  const scoreSize = format === 'og' ? 96 : 116
   ctx.font = `900 ${scoreSize}px system-ui, -apple-system, sans-serif`
   ctx.fillStyle = sc
   ctx.fillText(String(rating.score), cx + pad, y + scoreSize)
+  y += scoreSize + 6
 
-  // Measure while the large font is still active — changing font first was the bug
-  const scoreTextWidth = ctx.measureText(String(rating.score)).width
-
-  // "/10" shares the same baseline as the score
-  ctx.font = `700 ${slashSize}px system-ui, sans-serif`
+  // "/10" directly below the score, left-aligned
+  const slashSize = format === 'og' ? 26 : 34
+  ctx.font = `600 ${slashSize}px system-ui, sans-serif`
   ctx.fillStyle = '#52525b'
-  ctx.fillText('/10', cx + pad + scoreTextWidth + 10, y + scoreSize)
-
-  y += scoreSize + 32
+  ctx.fillText('/10', cx + pad, y + slashSize)
+  y += slashSize + 28
 
   // ── Category label ─────────────────────────────────────────────────────────
-  const catSize = format === 'og' ? 15 : 22
+  const catSize = format === 'og' ? 14 : 20
   ctx.font = `700 ${catSize}px system-ui, sans-serif`
   ctx.fillStyle = '#71717a'
   ctx.fillText((CAT_LABELS[rating.category] ?? 'Other').toUpperCase(), cx + pad, y + catSize)
-  y += catSize + 24
+  y += catSize + 20
 
   // ── Title (word-wrapped) ───────────────────────────────────────────────────
-  const titleSize = format === 'og' ? 36 : 56
+  const titleSize = format === 'og' ? 34 : 52
   ctx.font = `700 ${titleSize}px system-ui, sans-serif`
   ctx.fillStyle = '#ffffff'
   const titleLines = wrapText(ctx, rating.title, cw - pad * 2).slice(0, 3)
   for (const line of titleLines) {
     ctx.fillText(line, cx + pad, y + titleSize)
-    y += titleSize + 10
+    y += titleSize + 8
   }
 
-  // ── Footer: @username left, "rateit" right ─────────────────────────────────
+  // ── Footer ─────────────────────────────────────────────────────────────────
   const footerY = cy + ch - pad
-  const brandSize = format === 'og' ? 24 : 40
+  const brandSize = format === 'og' ? 22 : 36
+  ctx.strokeStyle = '#27272a'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(cx + pad, footerY - brandSize - 14)
+  ctx.lineTo(cx + cw - pad, footerY - brandSize - 14)
+  ctx.stroke()
   ctx.font = `700 ${brandSize}px system-ui, sans-serif`
   ctx.fillStyle = '#ffffff'
   ctx.fillText('rateit', cx + pad, footerY)
-
-  // Thin separator line above footer
-  ctx.strokeStyle = '#27272a'
-  ctx.lineWidth = format === 'og' ? 1 : 2
-  ctx.beginPath()
-  ctx.moveTo(cx + pad, footerY - brandSize - 16)
-  ctx.lineTo(cx + cw - pad, footerY - brandSize - 16)
-  ctx.stroke()
 
   return new Promise((resolve, reject) =>
     canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas export failed')), 'image/png')
