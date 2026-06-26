@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Share2, X, Copy, Check, Download, ExternalLink } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { track } from '../lib/analytics'
@@ -13,12 +13,166 @@ interface Props {
 
 const SITE = 'https://rateit-gamma.vercel.app'
 
+const CAT_LABELS: Record<string, string> = {
+  movie: 'Movie', tv: 'TV Show', sport: 'Sport', youtube: 'YouTube',
+  music: 'Music', book: 'Book', game: 'Game', food: 'Food',
+  person: 'Person', other: 'Other',
+}
+
 function shareUrl(ratingId: string, platform: string) {
   return `${SITE}/r/${ratingId}?ref=share&utm_source=${platform}&utm_medium=social`
 }
-
 function shareText(title: string, score: number) {
   return `${score}/10 — ${title}`
+}
+function scoreColor(s: number) {
+  return s >= 8 ? '#22c55e' : s >= 5 ? '#eab308' : '#ef4444'
+}
+
+// Fetch an external image through our same-origin proxy so canvas isn't CORS-tainted
+async function fetchImageBlob(externalUrl: string): Promise<string | null> {
+  try {
+    const res = await fetch(`/api/image-proxy?url=${encodeURIComponent(externalUrl)}`)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    return URL.createObjectURL(blob)
+  } catch {
+    return null
+  }
+}
+
+async function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+function drawCoverImage(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number, y: number, w: number, h: number
+) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight)
+  const dw = img.naturalWidth * scale
+  const dh = img.naturalHeight * scale
+  const dx = x + (w - dw) / 2
+  const dy = y + (h - dh) / 2
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(x, y, w, h)
+  ctx.clip()
+  ctx.drawImage(img, dx, dy, dw, dh)
+  ctx.restore()
+}
+
+// Wrap text into lines that fit within maxWidth, return array of lines
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ')
+  const lines: string[] = []
+  let line = ''
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line)
+      line = word
+    } else {
+      line = test
+    }
+  }
+  if (line) lines.push(line)
+  return lines
+}
+
+async function buildCanvas(
+  format: 'og' | 'story',
+  rating: Props['rating'],
+  artworkUrl: string | null
+): Promise<Blob> {
+  const W = format === 'og' ? 1200 : 1080
+  const H = format === 'og' ? 630 : 1920
+
+  const canvas = document.createElement('canvas')
+  canvas.width = W
+  canvas.height = H
+  const ctx = canvas.getContext('2d')!
+
+  // Background
+  ctx.fillStyle = '#09090b'
+  ctx.fillRect(0, 0, W, H)
+
+  // Artwork panel dimensions
+  const artW = format === 'og' ? 480 : W
+  const artH = format === 'og' ? H : Math.round(H * 0.55)
+
+  // Artwork background
+  ctx.fillStyle = '#18181b'
+  ctx.fillRect(0, 0, artW, artH)
+
+  // Draw artwork image if available
+  if (artworkUrl) {
+    const blobUrl = await fetchImageBlob(artworkUrl)
+    if (blobUrl) {
+      try {
+        const img = await loadImage(blobUrl)
+        drawCoverImage(ctx, img, 0, 0, artW, artH)
+      } catch { /* keep dark panel */ }
+      URL.revokeObjectURL(blobUrl)
+    }
+  }
+
+  // Content area origin
+  const cx = format === 'og' ? artW : 0
+  const cy = format === 'og' ? 0 : artH
+  const cw = format === 'og' ? W - artW : W
+  const ch = format === 'og' ? H : H - artH
+  const pad = format === 'og' ? 52 : 72
+
+  let y = cy + pad
+
+  // Score
+  const sc = scoreColor(rating.score)
+  const scoreSize = format === 'og' ? 100 : 128
+  ctx.font = `900 ${scoreSize}px system-ui, -apple-system, sans-serif`
+  ctx.fillStyle = sc
+  ctx.fillText(String(rating.score), cx + pad, y + scoreSize)
+
+  // "/10" beside the score
+  const slashSize = format === 'og' ? 34 : 44
+  ctx.font = `700 ${slashSize}px system-ui, sans-serif`
+  ctx.fillStyle = '#52525b'
+  const scoreWidth = ctx.measureText(String(rating.score)).width
+  ctx.fillText('/10', cx + pad + scoreWidth + 8, y + scoreSize - 12)
+  y += scoreSize + 24
+
+  // Category label
+  const catSize = format === 'og' ? 16 : 24
+  ctx.font = `700 ${catSize}px system-ui, sans-serif`
+  ctx.fillStyle = '#71717a'
+  ctx.fillText((CAT_LABELS[rating.category] ?? 'Other').toUpperCase(), cx + pad, y + catSize)
+  y += catSize + 28
+
+  // Title (wrapped)
+  const titleSize = format === 'og' ? 38 : 60
+  ctx.font = `700 ${titleSize}px system-ui, sans-serif`
+  ctx.fillStyle = '#ffffff'
+  const titleLines = wrapText(ctx, rating.title, cw - pad * 2).slice(0, 3)
+  for (const line of titleLines) {
+    ctx.fillText(line, cx + pad, y + titleSize)
+    y += titleSize + 8
+  }
+
+  // "rateit" branding — bottom of content area
+  const brandSize = format === 'og' ? 26 : 44
+  ctx.font = `700 ${brandSize}px system-ui, sans-serif`
+  ctx.fillStyle = '#ffffff'
+  ctx.fillText('rateit', cx + pad, cy + ch - pad)
+
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas export failed')), 'image/png')
+  )
 }
 
 export default function ShareButton({ rating, iconOnly = false }: Props) {
@@ -36,7 +190,7 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
     ? (rating.image_url ?? fetchedUrl)!.replace(/^http:\/\//, 'https://')
     : null
 
-  // When modal opens: reset failure flag, and fetch image if none stored on the rating
+  // When modal opens: reset failure flag; fetch artwork if none is stored on the rating
   useEffect(() => {
     if (!open) return
     setPreviewFailed(false)
@@ -49,44 +203,32 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
 
   async function handleShare() {
     track('share_initiated', { platform: 'native', rid: rating.id })
-
     const url = shareUrl(rating.id, 'native')
     const text = shareText(rating.title, rating.score)
 
-    // Only use Web Share API on genuine touch/mobile devices.
-    // Desktop Chrome has 'share' in navigator but the native share sheet is often
-    // invisible or shows no targets — always use the custom modal on desktop.
     const isTouchDevice =
       'share' in navigator &&
       typeof window !== 'undefined' &&
       window.matchMedia('(pointer: coarse)').matches
 
     if (isTouchDevice) {
-      // Level 2: share with image file so it appears in Instagram Stories etc.
       try {
-        const storyRes = await fetch(`/r/${rating.id}/og-story`)
-        if (storyRes.ok) {
-          const blob = await storyRes.blob()
-          const file = new File([blob], `rateit-${rating.id}.png`, { type: 'image/png' })
-          if (navigator.canShare?.({ files: [file] })) {
-            await navigator.share({ files: [file], title: text, url })
-            return
-          }
+        const blob = await buildCanvas('story', rating, previewUrl)
+        const file = new File([blob], `rateit-${rating.id}.png`, { type: 'image/png' })
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: text, url })
+          return
         }
       } catch { /* fall through */ }
 
-      // Level 1: URL-only share
       try {
         await navigator.share({ title: text, url })
         return
       } catch (err) {
-        // User cancelled the native share sheet → do nothing
         if (err instanceof Error && err.name === 'AbortError') return
-        // Any other failure → open the modal below
       }
     }
 
-    // Desktop, or all mobile fallbacks exhausted
     setOpen(true)
   }
 
@@ -97,23 +239,18 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
     track('share_initiated', { platform: 'copy', rid: rating.id })
   }
 
-  async function downloadImage(format: 'og' | 'story'): Promise<boolean> {
+  async function downloadCanvas(format: 'og' | 'story'): Promise<boolean> {
     setDownloading(format)
     setDownloadError(false)
     try {
-      const endpoint = format === 'og'
-        ? `/r/${rating.id}/opengraph-image`
-        : `/r/${rating.id}/og-story`
-      const res = await fetch(endpoint)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      const blob = await res.blob()
+      const blob = await buildCanvas(format, rating, previewUrl)
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
       a.download = `rateit-${rating.title.replace(/[^a-z0-9]/gi, '-')}-${format}.png`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(a.href)
+      setTimeout(() => URL.revokeObjectURL(a.href), 100)
       track('share_initiated', { platform: `download_${format}`, rid: rating.id })
       return true
     } catch {
@@ -127,7 +264,7 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
 
   async function downloadForInstagram() {
     setIgHint(false)
-    const ok = await downloadImage('story')
+    const ok = await downloadCanvas('story')
     if (ok) setIgHint(true)
     track('share_initiated', { platform: 'instagram', rid: rating.id })
   }
@@ -211,7 +348,7 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
                 )}
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => downloadImage('og')}
+                    onClick={() => downloadCanvas('og')}
                     disabled={!!downloading}
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[var(--line)] text-xs font-semibold hover:bg-[var(--surface)] transition-colors disabled:opacity-40"
                   >
@@ -219,7 +356,7 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
                     {downloading === 'og' ? t('downloading') : t('card')}
                   </button>
                   <button
-                    onClick={() => downloadImage('story')}
+                    onClick={() => downloadCanvas('story')}
                     disabled={!!downloading}
                     className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-[var(--line)] text-xs font-semibold hover:bg-[var(--surface)] transition-colors disabled:opacity-40"
                   >
