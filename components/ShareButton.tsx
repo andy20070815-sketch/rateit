@@ -7,7 +7,7 @@ import { track } from '../lib/analytics'
 import type { Rating } from '../lib/types'
 
 interface Props {
-  rating: Pick<Rating, 'id' | 'title' | 'score'>
+  rating: Pick<Rating, 'id' | 'title' | 'score'> & { image_url?: string | null }
   iconOnly?: boolean
 }
 
@@ -27,7 +27,13 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
   const [downloading, setDownloading] = useState<'og' | 'story' | null>(null)
   const [downloadError, setDownloadError] = useState(false)
   const [igHint, setIgHint] = useState(false)
+  const [previewFailed, setPreviewFailed] = useState(false)
   const t = useTranslations('share')
+
+  // Force HTTPS so HTTP poster URLs (e.g. OMDB) aren't blocked as mixed-content
+  const previewUrl = rating.image_url
+    ? rating.image_url.replace(/^http:\/\//, 'https://')
+    : null
 
   async function handleShare() {
     track('share_initiated', { platform: 'native', rid: rating.id })
@@ -154,16 +160,19 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
               </button>
             </div>
 
-            {/* OG image preview */}
-            <div className="px-5 pt-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/r/${rating.id}/opengraph-image`}
-                alt="Share preview"
-                className="w-full rounded-xl border border-[var(--line)]"
-                style={{ aspectRatio: '1200/630' }}
-              />
-            </div>
+            {/* Preview image */}
+            {previewUrl && !previewFailed && (
+              <div className="px-5 pt-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={previewUrl}
+                  alt={rating.title}
+                  className="w-full rounded-xl border border-[var(--line)] object-cover"
+                  style={{ aspectRatio: '16/10', maxHeight: 220 }}
+                  onError={() => setPreviewFailed(true)}
+                />
+              </div>
+            )}
 
             <div className="px-5 py-4 space-y-4">
 

@@ -42,7 +42,7 @@ export default function StoryBar({ groups, currentUser, seenStoryIds: initialSee
                 {currentUser.avatar_url ? (
                   <img src={currentUser.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xl font-black">{currentUser.username[0].toUpperCase()}</span>
+                  <span className="text-xl font-black">{(currentUser.username[0] ?? 'U').toUpperCase()}</span>
                 )}
               </div>
             </div>
@@ -57,7 +57,7 @@ export default function StoryBar({ groups, currentUser, seenStoryIds: initialSee
               {currentUser.avatar_url ? (
                 <img src={currentUser.avatar_url} alt="" className="w-full h-full object-cover opacity-40 rounded-full" />
               ) : (
-                <span className="text-xl font-black text-zinc-400">{currentUser.username[0].toUpperCase()}</span>
+                <span className="text-xl font-black text-zinc-400">{(currentUser.username[0] ?? 'U').toUpperCase()}</span>
               )}
               <div className="absolute bottom-0 right-0 w-5 h-5 bg-black dark:bg-white rounded-full flex items-center justify-center">
                 <PlusCircle size={14} className="text-white dark:text-black" />
@@ -87,7 +87,7 @@ export default function StoryBar({ groups, currentUser, seenStoryIds: initialSee
                     <img src={group.profile.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-xl font-black">
-                      {group.profile.username[0].toUpperCase()}
+                      {(group.profile.username[0] ?? 'U').toUpperCase()}
                     </span>
                   )}
                 </div>

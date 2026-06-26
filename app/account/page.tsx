@@ -46,7 +46,7 @@ export default async function AccountPage() {
         <div className="flex flex-col items-center gap-3 pt-4">
           <AvatarUpload
             currentUrl={profile?.avatar_url ?? null}
-            username={profile?.username ?? '?'}
+            username={profile?.username || user.email?.split('@')[0] || 'U'}
           />
           <div className="text-center">
             <p className="text-2xl font-black">@{profile?.username}</p>

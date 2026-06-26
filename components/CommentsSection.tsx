@@ -90,7 +90,7 @@ export default function CommentsSection({ ratingId, currentUserId, onCountChange
                     <img src={c.profiles.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs font-bold text-[var(--muted)]">
-                      {c.profiles.username[0].toUpperCase()}
+                      {(c.profiles.username[0] ?? 'U').toUpperCase()}
                     </div>
                   )}
                 </div>

@@ -46,7 +46,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
             {rating.profiles.avatar_url ? (
               <img src={rating.profiles.avatar_url} alt={rating.profiles.username} className="w-full h-full object-cover" loading="lazy" />
             ) : (
-              rating.profiles.username[0].toUpperCase()
+              (rating.profiles.username[0] ?? 'U').toUpperCase()
             )}
           </div>
           <span className="text-sm font-semibold leading-none flex-1 text-[var(--ink)]">{rating.profiles.username}</span>
@@ -124,7 +124,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
                 ? tComments('count', { count: commentCount })
                 : tComments('label')}
           </button>
-          <ShareButton rating={rating} />
+          <ShareButton rating={{ id: rating.id, title: rating.title, score: rating.score, image_url: rating.image_url }} />
         </div>
 
         {showComments && (

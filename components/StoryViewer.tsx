@@ -145,7 +145,7 @@ export default function StoryViewer({ groups, startGroupIndex, viewerId, onClose
                 <img src={group.profile.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white">
-                  {group.profile.username[0].toUpperCase()}
+                  {(group.profile.username[0] ?? 'U').toUpperCase()}
                 </div>
               )}
             </div>

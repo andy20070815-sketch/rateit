@@ -53,7 +53,7 @@ export default function ProfileGrid({ ratings }: { ratings: Rating[] }) {
           {/* Share button — bottom-left, above the link. Always visible. */}
           <div className="absolute bottom-1.5 left-1.5 z-10">
             <ShareButton
-              rating={{ id: r.id, title: r.title, score: r.score }}
+              rating={{ id: r.id, title: r.title, score: r.score, image_url: r.image_url }}
               iconOnly
             />
           </div>

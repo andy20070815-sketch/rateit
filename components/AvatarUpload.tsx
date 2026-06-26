@@ -98,7 +98,7 @@ export default function AvatarUpload({ currentUrl, username }: Props) {
         <div className="w-full h-full rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden flex items-center justify-center text-4xl font-black select-none">
           {url
             ? <img src={url} alt={username} className="w-full h-full object-cover" />
-            : (username[0]?.toUpperCase() ?? '?')}
+            : ((username.replace(/[^a-zA-Z0-9]/g, '')[0] ?? 'U').toUpperCase())}
         </div>
 
         {/* Hover / loading overlay */}

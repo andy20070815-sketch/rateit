@@ -129,7 +129,7 @@ export default async function ProfilePage({ params }: Props) {
               {profile.avatar_url ? (
                 <img src={profile.avatar_url} alt={profile.username} className="w-full h-full object-cover" />
               ) : (
-                profile.username[0].toUpperCase()
+                (profile.username[0] ?? 'U').toUpperCase()
               )}
             </div>
 
