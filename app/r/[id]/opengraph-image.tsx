@@ -20,14 +20,23 @@ function scoreColor(s: number) {
 async function fetchArtworkDataUrl(url: string | null): Promise<string | null> {
   if (!url) return null
   try {
-    const res = await fetch(url)
+    // Upgrade HTTP → HTTPS (e.g. OMDB poster URLs use http://)
+    const safeUrl = url.replace(/^http:\/\//, 'https://')
+    const controller = new AbortController()
+    const t = setTimeout(() => controller.abort(), 4000)
+    const res = await fetch(safeUrl, { signal: controller.signal })
+    clearTimeout(t)
     if (!res.ok) return null
     const buf = await res.arrayBuffer()
     const bytes = new Uint8Array(buf)
-    let binary = ''
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+    // Chunked String.fromCharCode avoids O(n²) single-char concatenation
+    const CHUNK = 8192
+    const parts: string[] = []
+    for (let i = 0; i < bytes.byteLength; i += CHUNK) {
+      parts.push(String.fromCharCode(...Array.from(bytes.subarray(i, i + CHUNK))))
+    }
     const mime = res.headers.get('content-type') ?? 'image/jpeg'
-    return `data:${mime};base64,${btoa(binary)}`
+    return `data:${mime};base64,${btoa(parts.join(''))}`
   } catch {
     return null
   }
@@ -121,9 +130,9 @@ export default async function Image({ params }: { params: Promise<{ id: string }
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-              <div style={{ fontSize: 64, color: '#3f3f46', fontWeight: 700 }}>{catLabel}</div>
-              <div style={{ fontSize: 28, color: '#27272a', fontWeight: 700 }}>rateit</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, width: '100%', height: '100%', background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)' }}>
+              <div style={{ fontSize: 72, color: '#a1a1aa', fontWeight: 700 }}>{catLabel}</div>
+              <div style={{ fontSize: 32, color: '#52525b', fontWeight: 700 }}>rateit</div>
             </div>
           )}
         </div>

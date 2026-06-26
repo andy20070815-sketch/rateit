@@ -124,7 +124,7 @@ export default function RatingCard({ rating, showUser = true }: Props) {
                 ? tComments('count', { count: commentCount })
                 : tComments('label')}
           </button>
-          <ShareButton rating={{ id: rating.id, title: rating.title, score: rating.score, image_url: rating.image_url }} />
+          <ShareButton rating={{ id: rating.id, title: rating.title, score: rating.score, category: rating.category, image_url: rating.image_url }} />
         </div>
 
         {showComments && (

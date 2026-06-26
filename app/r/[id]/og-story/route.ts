@@ -16,14 +16,21 @@ function scoreColor(s: number) {
 async function fetchArtworkDataUrl(url: string | null): Promise<string | null> {
   if (!url) return null
   try {
-    const res = await fetch(url)
+    const safeUrl = url.replace(/^http:\/\//, 'https://')
+    const controller = new AbortController()
+    const t = setTimeout(() => controller.abort(), 4000)
+    const res = await fetch(safeUrl, { signal: controller.signal })
+    clearTimeout(t)
     if (!res.ok) return null
     const buf = await res.arrayBuffer()
     const bytes = new Uint8Array(buf)
-    let binary = ''
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i])
+    const CHUNK = 8192
+    const parts: string[] = []
+    for (let i = 0; i < bytes.byteLength; i += CHUNK) {
+      parts.push(String.fromCharCode(...Array.from(bytes.subarray(i, i + CHUNK))))
+    }
     const mime = res.headers.get('content-type') ?? 'image/jpeg'
-    return `data:${mime};base64,${btoa(binary)}`
+    return `data:${mime};base64,${btoa(parts.join(''))}`
   } catch {
     return null
   }
@@ -92,8 +99,8 @@ export async function GET(
 
   const artworkContent = artworkDataUrl
     ? e('img', { src: artworkDataUrl, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover' } } as React.ImgHTMLAttributes<HTMLImageElement> & { style: React.CSSProperties })
-    : e('div', { style: { display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 20 } },
-        e('div', { style: { fontSize: 120, color: '#3f3f46', fontWeight: 700 } }, catLabel)
+    : e('div', { style: { display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', gap: 24, width: '100%', height: '100%', background: 'linear-gradient(135deg, #27272a 0%, #18181b 100%)' } },
+        e('div', { style: { fontSize: 120, color: '#a1a1aa', fontWeight: 700 } }, catLabel)
       )
 
   const tree = e('div', {

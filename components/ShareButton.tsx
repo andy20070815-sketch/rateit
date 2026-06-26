@@ -7,7 +7,7 @@ import { track } from '../lib/analytics'
 import type { Rating } from '../lib/types'
 
 interface Props {
-  rating: Pick<Rating, 'id' | 'title' | 'score'> & { image_url?: string | null }
+  rating: Pick<Rating, 'id' | 'title' | 'score' | 'category'> & { image_url?: string | null }
   iconOnly?: boolean
 }
 
@@ -28,12 +28,24 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
   const [downloadError, setDownloadError] = useState(false)
   const [igHint, setIgHint] = useState(false)
   const [previewFailed, setPreviewFailed] = useState(false)
+  const [fetchedUrl, setFetchedUrl] = useState<string | null>(null)
   const t = useTranslations('share')
 
   // Force HTTPS so HTTP poster URLs (e.g. OMDB) aren't blocked as mixed-content
-  const previewUrl = rating.image_url
-    ? rating.image_url.replace(/^http:\/\//, 'https://')
+  const previewUrl = (rating.image_url ?? fetchedUrl)
+    ? (rating.image_url ?? fetchedUrl)!.replace(/^http:\/\//, 'https://')
     : null
+
+  // When modal opens: reset failure flag, and fetch image if none stored on the rating
+  useEffect(() => {
+    if (!open) return
+    setPreviewFailed(false)
+    if (rating.image_url || fetchedUrl) return
+    fetch(`/api/content-image?title=${encodeURIComponent(rating.title)}&category=${rating.category}`)
+      .then(r => r.json())
+      .then(d => { if (d.url) setFetchedUrl(d.url) })
+      .catch(() => null)
+  }, [open])
 
   async function handleShare() {
     track('share_initiated', { platform: 'native', rid: rating.id })
