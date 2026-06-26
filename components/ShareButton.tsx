@@ -309,10 +309,10 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
               </button>
             </div>
 
-            {/* Preview image */}
-            {previewUrl && !previewFailed && (
-              <div className="px-5 pt-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* Preview — artwork if available, branded placeholder otherwise */}
+            <div className="px-5 pt-4">
+              {previewUrl && !previewFailed ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={previewUrl}
                   alt={rating.title}
@@ -320,8 +320,24 @@ export default function ShareButton({ rating, iconOnly = false }: Props) {
                   style={{ aspectRatio: '16/10', maxHeight: 220 }}
                   onError={() => setPreviewFailed(true)}
                 />
-              </div>
-            )}
+              ) : (
+                <div
+                  className="w-full rounded-xl border border-[var(--line)] bg-zinc-900 flex flex-col items-center justify-center gap-1.5 px-4"
+                  style={{ aspectRatio: '16/10', maxHeight: 220 }}
+                >
+                  <span className={`text-5xl font-black leading-none ${rating.score >= 8 ? 'text-green-400' : rating.score >= 5 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    {rating.score}
+                  </span>
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                    {CAT_LABELS[rating.category] ?? 'Other'}
+                  </span>
+                  <span className="text-sm font-semibold text-white text-center line-clamp-2 leading-snug">
+                    {rating.title}
+                  </span>
+                  <span className="text-[10px] text-zinc-600 font-bold tracking-wider mt-1">rateit</span>
+                </div>
+              )}
+            </div>
 
             <div className="px-5 py-4 space-y-4">
 
