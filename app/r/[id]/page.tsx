@@ -33,13 +33,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = r.review
     ? `"${r.review.slice(0, 120)}${r.review.length > 120 ? '…' : ''}"`
     : `${r.score}/10 on rateit`
-  const ogImage = `/r/${id}/opengraph-image`
 
+  // Do NOT set openGraph.images here — opengraph-image.tsx handles that
+  // automatically. Setting both produces duplicate og:image tags which
+  // confuses Meta/Threads crawlers into showing neither.
   return {
     title,
     description,
-    openGraph: { title, description, url: `/r/${id}`, images: [{ url: ogImage, width: 1200, height: 630 }] },
-    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
+    openGraph: { title, description, url: `/r/${id}` },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 
